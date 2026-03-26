@@ -1,0 +1,148 @@
+version: '3.8'
+
+services:
+  # ========================================================
+  # DATABASE
+  # ========================================================
+  postgres:
+    image: postgres:15-alpine
+    container_name: deka-postgres
+    environment:
+      POSTGRES_USER: deka
+      POSTGRES_PASSWORD: password123
+      POSTGRES_DB: deka_social_commerce
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    health_check:
+      test: ["CMD-SHELL", "pg_isready -U deka"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ========================================================
+  # CACHE & PUB/SUB
+  # ========================================================
+  redis:
+    image: redis:7-alpine
+    container_name: deka-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    health_check:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ========================================================
+  # OBJECT STORAGE (MinIO - S3 compatible)
+  # ========================================================
+  minio:
+    image: minio/minio
+    container_name: deka-minio
+    environment:
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: minioadmin
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    volumes:
+      - minio_data:/minio_data
+    command: server /minio_data --console-address ":9001"
+
+  # ========================================================
+  # BACKEND API (NestJS)
+  # ========================================================
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: deka-backend
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgresql://deka:password123@postgres:5432/deka_social_commerce
+      REDIS_URL: redis://redis:6379
+      JWT_SECRET: your-super-secret-jwt-key-change-in-production
+      NODE_ENV: development
+      API_PORT: 3000
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./backend/src:/app/src
+    command: npm run start:dev
+
+  # ========================================================
+  # FRONTEND - CLIENT SHOP (Next.js)
+  # ========================================================
+  frontend-client:
+    build:
+      context: ./frontend-web
+      dockerfile: Dockerfile.client
+    container_name: deka-frontend-client
+    environment:
+      NEXT_PUBLIC_API_URL: http://localhost:3000
+    ports:
+      - "3001:3000"
+    depends_on:
+      - backend
+
+  # ========================================================
+  # FRONTEND - RESELLER DASHBOARD (Next.js)
+  # ========================================================
+  frontend-reseller:
+    build:
+      context: ./frontend-web
+      dockerfile: Dockerfile.reseller
+    container_name: deka-frontend-reseller
+    environment:
+      NEXT_PUBLIC_API_URL: http://localhost:3000
+    ports:
+      - "3002:3000"
+    depends_on:
+      - backend
+
+  # ========================================================
+  # FRONTEND - SUPPLIER DASHBOARD (Next.js)
+  # ========================================================
+  frontend-supplier:
+    build:
+      context: ./frontend-web
+      dockerfile: Dockerfile.supplier
+    container_name: deka-frontend-supplier
+    environment:
+      NEXT_PUBLIC_API_URL: http://localhost:3000
+    ports:
+      - "3003:3000"
+    depends_on:
+      - backend
+
+  # ========================================================
+  # FRONTEND - ADMIN PANEL (Next.js)
+  # ========================================================
+  frontend-admin:
+    build:
+      context: ./frontend-web
+      dockerfile: Dockerfile.admin
+    container_name: deka-frontend-admin
+    environment:
+      NEXT_PUBLIC_API_URL: http://localhost:3000
+    ports:
+      - "3004:3000"
+    depends_on:
+      - backend
+
+volumes:
+  postgres_data:
+  redis_data:
+  minio_data:
+
+networks:
+  default:
+    name: deka-network

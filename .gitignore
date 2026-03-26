@@ -1,0 +1,62 @@
+# Dependencies
+node_modules/
+.pnp
+.pnp.js
+package-lock.json
+yarn.lock
+
+# Parcel
+dist/
+build/
+.cache/
+
+# Next.js
+.next/
+out/
+*.zip
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Environment
+.env
+.env.local
+.env.*.local
+*.pem
+
+# Testing
+coverage/
+.nyc_output/
+
+# Database
+*.db
+*.db-journal
+deka_delivery.db
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+lerna-debug.log*
+
+# Docker
+.dockerignore
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Build outputs
+dist/
+build/
+*.tsbuildinfo
+
+# Prisma
+.env
+prisma/dev.db
+prisma/dev.db-journal

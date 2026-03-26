@@ -1,0 +1,419 @@
+// Deka Backend - Prisma Schema
+// Social-Commerce as a Service Platform
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ============================================================================
+// ENUMS
+// ============================================================================
+
+enum UserRole {
+  SUPPLIER
+  RESELLER
+  DELIVERY
+  ADMIN
+}
+
+enum KYCStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+enum OrderStatus {
+  PENDING
+  PAID
+  PROCESSING
+  DELIVERED
+  CANCELLED
+}
+
+enum PackageStatus {
+  PREPARED
+  COLLECTED
+  AT_HUB
+  DELIVERED
+  REJECTED
+}
+
+enum DeliveryType {
+  DIRECT
+  HUB
+}
+
+enum PaymentStatus {
+  PENDING
+  COMPLETED
+  FAILED
+  REFUNDED
+}
+
+enum SyncSource {
+  EXCEL_UPLOAD
+  AGENT
+  DASHBOARD_MANUAL
+}
+
+// ============================================================================
+// USERS & AUTH
+// ============================================================================
+
+model User {
+  id            String    @id @default(uuid())
+  email         String    @unique
+  passwordHash  String
+  phone         String?   @unique
+  firstName      String?
+  lastName       String?
+  role          UserRole  @default(RESELLER)
+  kycStatus     KYCStatus @default(PENDING)
+  kycDocument   String?   // S3 URL
+  isActive      Boolean   @default(true)
+  
+  // Wallet
+  walletBalance Decimal   @default(0) @db.Decimal(19, 4)
+  
+  // Relationships
+  products      Product[]
+  orders        Order[]
+  payments      Payment[]
+  payoutRequests PayoutRequest[]
+  refunds       Refund[]
+  syncReports   SyncReport[] @relation("SyncReports")
+  agentKeys     AgentKey[] @relation("AgentKeys")
+  
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  @@index([role, isActive])
+  @@index([kycStatus])
+}
+
+// ============================================================================
+// PRODUCTS & CATALOG
+// ============================================================================
+
+model Product {
+  id                    String       @id @default(uuid())
+  supplierId            String
+  supplier              User         @relation(fields: [supplierId], references: [id], onDelete: Cascade)
+  
+  // Identité — remplis automatiquement depuis le fichier Excel
+  referenceInterne      String       // clé fournisseur, UNIQUE par supplier_id
+  nomProduit            String
+  description           String
+  caracteristique       String?      // champ libre optionnel
+  categorie             String?
+  imageUrl              String       // URL fournie dans l'Excel (hébergée chez le fournisseur)
+  imageCdnUrl           String?      // copie mise en cache sur notre CDN après vérification
+
+  // Prix & commission (définis par le fournisseur dans l'Excel)
+  prixVente             Decimal      @db.Decimal(19, 4)  // prix affiché au client final
+  commission            Decimal      @db.Decimal(19, 4)  // montant fixe en devise locale
+  pourcentageCommission Decimal      @db.Decimal(5, 2)   // ex: 15.00 pour 15%
+  // prix_gros (implicite) = prix_vente - commission
+
+  // Stock
+  stockQuantity         Int          @default(0)         // 0 → is_active = false automatiquement
+  isActive              Boolean      @default(true)      // false si stock=0 OU désactivé manuellement
+
+  // Traçabilité sync
+  lastSyncedAt          DateTime?
+  syncSource            SyncSource   @default(DASHBOARD_MANUAL)
+  
+  // Relationships
+  orderItems            OrderItem[]
+  
+  createdAt             DateTime     @default(now())
+  updatedAt             DateTime     @updatedAt
+
+  @@unique([supplierId, referenceInterne])
+  @@index([supplierId, isActive])
+  @@index([categorie])
+}
+
+// ============================================================================
+// INVENTORY SYNC (EXCEL)
+// ============================================================================
+
+model AgentKey {
+  id              String   @id @default(uuid())
+  supplierId      String
+  supplier        User     @relation("AgentKeys", fields: [supplierId], references: [id], onDelete: Cascade)
+  
+  // La clé est stockée hashée
+  keyHash         String   @unique  // bcryptjs hash
+  keyPreview      String           // Premiers 8 chars pour l'UI (ex: "sk_1a2b...")
+  
+  name            String           // Nom descriptif (ex: "Agent PC Bureau")
+  isRevoked       Boolean  @default(false)
+  revokedAt       DateTime?
+  
+  // Audit
+  createdAt       DateTime @default(now())
+  lastUsedAt      DateTime?
+  
+  @@index([supplierId])
+  @@index([isRevoked])
+}
+
+model SyncReport {
+  id                  String   @id @default(uuid())
+  supplierId          String
+  supplier            User     @relation("SyncReports", fields: [supplierId], references: [id], onDelete: Cascade)
+  
+  syncedAt            DateTime @default(now())
+  source              SyncSource
+  productsCreated     Int      @default(0)
+  productsUpdated     Int      @default(0)
+  productsDeactivated Int      @default(0)
+  errors              String   @default("[]")  // JSON array: [{ row: 3, reference: 'REF-001', reason: '...' }]
+  
+  createdAt           DateTime @default(now())
+
+  @@index([supplierId])
+  @@index([syncedAt])
+}
+
+// ============================================================================
+// ORDERS & ITEMS
+// ============================================================================
+
+model Order {
+  id              String    @id @default(uuid())
+  resellerId      String?
+  reseller        User?     @relation(fields: [resellerId], references: [id], onDelete: SetNull)
+  
+  status          OrderStatus @default(PENDING)
+  totalAmount     Decimal   @db.Decimal(19, 4)
+  escrowBalance   Decimal   @default(0) @db.Decimal(19, 4)  // Funds locked until delivery
+  
+  // Customer info
+  customerEmail   String
+  customerPhone   String
+  
+  // Delivery info
+  deliveryAddress String
+  deliveryType    DeliveryType @default(DIRECT)
+  estimatedDelivery DateTime?
+  
+  // Relationships
+  items           OrderItem[]
+  payments        Payment[]
+  
+  // Metadata
+  notes           String?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  @@index([resellerId, status])
+  @@index([status, createdAt])
+  @@index([customerEmail])
+}
+
+model OrderItem {
+  id              String    @id @default(uuid())
+  orderId         String
+  order           Order     @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  
+  productId       String
+  product         Product   @relation(fields: [productId], references: [id])
+  
+  quantity        Int       @default(1)
+  unitPrice       Decimal   @db.Decimal(19, 4)
+  totalPrice      Decimal   @db.Decimal(19, 4)
+  
+  // Logistics
+  packageCode     String    @unique  // Format: AAMMJJ-XXXX
+  status          PackageStatus @default(PREPARED)
+  deliveryType    DeliveryType @default(DIRECT)
+  
+  // Delivery tracking
+  collectedAt     DateTime?
+  arrivedAtHubAt  DateTime?
+  deliveredAt     DateTime?
+  rejectedAt      DateTime?
+  rejectionReason String?
+  
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  @@index([orderId])
+  @@index([packageCode])
+  @@index([status])
+  @@unique([orderId, productId])
+}
+
+// ============================================================================
+// PAYMENTS & ESCROW
+// ============================================================================
+
+model Payment {
+  id              String    @id @default(uuid())
+  orderId         String
+  order           Order     @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  
+  userId          String
+  user            User      @relation(fields: [userId], references: [id])
+  
+  amount          Decimal   @db.Decimal(19, 4)
+  status          PaymentStatus @default(PENDING)
+  
+  // Mobile Money Gateway
+  provider        String    // MTN, ORANGE, WAVE, etc.
+  transactionId   String?   @unique
+  idempotencyKey  String    @unique  // Prevent double-charges
+  
+  callbackData    String?   // JSON payload from provider
+  
+  // Relations to audit and refunds
+  refunds         Refund[]
+  audits          PaymentAudit[]
+  
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  @@index([orderId])
+  @@index([userId])
+  @@index([status])
+  @@index([transactionId])
+}
+
+// ============================================================================
+// WALLET & PAYOUTS
+// ============================================================================
+
+model PayoutRequest {
+  id              String    @id @default(uuid())
+  userId          String
+  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  amount          Decimal   @db.Decimal(19, 4)
+  status          String    @default("pending")  // pending, processing, completed, failed
+  
+  // Mobile Money destination
+  mobileProvider  String    // MTN, ORANGE, WAVE
+  mobileNumber    String
+  
+  // Reference
+  payoutId        String?   @unique
+  refund          Refund?
+  
+  createdAt       DateTime  @default(now())
+  processedAt     DateTime?
+  completedAt     DateTime?
+
+  @@index([userId, status])
+  @@index([status, createdAt])
+}
+
+model Refund {
+  id              String    @id @default(uuid())
+  userId          String
+  user            User      @relation(fields: [userId], references: [id])
+  
+  paymentId       String
+  payment         Payment   @relation(fields: [paymentId], references: [id], onDelete: Cascade)
+  
+  amount          Decimal   @db.Decimal(19, 4)
+  reason          String    // Reason for refund
+  
+  adminId         String    // Admin who authorized refund
+  
+  status          String    @default("pending")  // pending, completed, failed
+  payoutRequest   PayoutRequest? @relation(fields: [payoutRequestId], references: [id])
+  payoutRequestId String?
+  
+  // Audit trail
+  createdAt       DateTime  @default(now())
+  processedAt     DateTime?
+  notes           String?
+
+  @@index([userId])
+  @@index([paymentId])
+  @@index([status])
+}
+
+// ============================================================================
+// PAYMENT AUDIT TRAIL
+// ============================================================================
+
+model PaymentAudit {
+  id              String    @id @default(uuid())
+  paymentId       String
+  payment         Payment   @relation(fields: [paymentId], references: [id], onDelete: Cascade)
+  
+  action          String    // CREATED, COMPLETED, FAILED, REFUND, MANUAL_ADJUSTMENT
+  amount          Decimal?  @db.Decimal(19, 4)
+  performedBy     String    // User ID who performed action (admin/system)
+  details         String?   // JSON payload for additional context
+  
+  createdAt       DateTime  @default(now())
+
+  @@index([paymentId])
+  @@index([action])
+  @@index([createdAt])
+}
+
+// ============================================================================
+// LOGISTICS & DELIVERY TRACKING
+// ============================================================================
+
+model DeliveryAgent {
+  id              String    @id @default(uuid())
+  userId          String    @unique
+  
+  assignedZone    String?
+  vehicle         String?
+  vehicleNumber   String?
+  
+  isOnline        Boolean   @default(false)
+  currentLocation String?
+  
+  acceptedDeliveries Int   @default(0)
+  completedDeliveries Int  @default(0)
+  rating          Float?   @db.Decimal(3, 2)
+  
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  @@index([isOnline])
+}
+
+// ============================================================================
+// AUDIT & COMPLIANCE
+// ============================================================================
+
+model AuditLog {
+  id              String    @id @default(uuid())
+  userId          String?
+  action          String
+  entity          String    // User, Product, Order, Payment, etc.
+  entityId        String
+  changes         String    // JSON
+  ipAddress       String?
+  
+  createdAt       DateTime  @default(now())
+
+  @@index([userId, action])
+  @@index([entity, entityId])
+}
+
+model SystemEvent {
+  id              String    @id @default(uuid())
+  eventType       String    // order.created, payment.completed, etc.
+  payload         String    // JSON
+  processed       Boolean   @default(false)
+  
+  createdAt       DateTime  @default(now())
+  processedAt     DateTime?
+
+  @@index([eventType, processed])
+}
