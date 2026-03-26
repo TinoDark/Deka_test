@@ -13,6 +13,8 @@
     "declaration": true,
     "moduleResolution": "node",
     "baseUrl": ".",
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
     "paths": {
       "@/*": ["src/*"]
     }

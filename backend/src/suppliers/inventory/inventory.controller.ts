@@ -220,7 +220,7 @@ export class InventoryController {
    * Liste les clés API agent du fournisseur
    */
   @Get('agent-keys')
-  async listAgentKeys(@CurrentUser() user: any) {
+  async listAgentKeys(@CurrentUser() user: any): Promise<any[]> {
     return this.agentKeyService.listAgentKeys(user.id);
   }
 
@@ -229,7 +229,7 @@ export class InventoryController {
    * Révoque une clé API agent
    */
   @Delete('agent-keys/:keyId')
-  async revokeAgentKey(@CurrentUser() user: any, @Param('keyId') keyId: string) {
+  async revokeAgentKey(@CurrentUser() user: any, @Param('keyId') keyId: string): Promise<{ message: string }> {
     await this.agentKeyService.revokeAgentKey(user.id, keyId);
     return { message: 'Agent key revoked successfully' };
   }
