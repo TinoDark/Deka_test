@@ -108,8 +108,8 @@ describe('Payments Module', () => {
           orderId,
           amount: 1198.5,
           status: 'COMPLETED',
-          provider: 'MTN',
-          transactionId: 'MTN-TXN-123',
+          provider: 'mix_by_yas',
+          transactionId: 'mix_by_yas-TXN-123',
         });
 
         expect(result.id).toBe(paymentId);
@@ -133,7 +133,7 @@ describe('Payments Module', () => {
           orderId,
           amount: 1198.5,
           status: 'COMPLETED',
-          provider: 'MTN',
+          provider: 'mix_by_yas',
         });
 
         expect(result.id).toBe(paymentId);
@@ -150,7 +150,7 @@ describe('Payments Module', () => {
             orderId: 'nonexistent-order',
             amount: 1000,
             status: 'COMPLETED',
-            provider: 'MTN',
+            provider: 'mix_by_yas',
           }),
         ).rejects.toThrow('not found');
       });
@@ -174,7 +174,7 @@ describe('Payments Module', () => {
             orderId,
             amount: 900, // ← Mismatch
             status: 'COMPLETED',
-            provider: 'MTN',
+            provider: 'mix_by_yas',
           }),
         ).rejects.toThrow('mismatch');
       });
@@ -274,7 +274,7 @@ describe('Payments Module', () => {
 
         const result = await service.createPayoutRequest(userId, {
           amount: 50000,
-          mobileProvider: 'MTN',
+          mobileProvider: 'mix_by_yas',
           mobileNumber: '+33612345678',
         });
 
@@ -292,7 +292,7 @@ describe('Payments Module', () => {
         await expect(
           service.createPayoutRequest('user-uuid', {
             amount: 50000,
-            mobileProvider: 'MTN',
+            mobileProvider: 'mix_by_yas',
             mobileNumber: '+33612345678',
           }),
         ).rejects.toThrow('KYC');
@@ -308,7 +308,7 @@ describe('Payments Module', () => {
         await expect(
           service.createPayoutRequest('user-uuid', {
             amount: 50000,
-            mobileProvider: 'MTN',
+            mobileProvider: 'mix_by_yas',
             mobileNumber: '+33612345678',
           }),
         ).rejects.toThrow('Insufficient');
@@ -349,7 +349,7 @@ describe('Payments Module', () => {
           orderId: 'order-uuid',
           amount: 1000,
           status: 'COMPLETED' as const,
-          provider: 'MTN' as const,
+          provider: 'mix_by_yas' as const,
         };
 
         jest.spyOn(service, 'handlePaymentCallback').mockResolvedValue({

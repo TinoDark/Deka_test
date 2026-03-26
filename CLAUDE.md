@@ -75,7 +75,7 @@ Application **Social-Commerce as a Service** permettant à des vendeurs indépen
 │  Object Storage S3 + CDN (images)  │  SQLite (device off.)  │
 ├─────────────────────────────────────────────────────────────┤
 │  EXTERNAL                                                    │
-│  Mobile Money (MTN · Orange · Wave)  │  SMS/Push            │
+│  Mobile Money (mix_by_yas · Moov Money)  │  SMS/Push            │
 │  GPS / Maps (OSM · Google Maps)  │  KYC provider            │
 └─────────────────────────────────────────────────────────────┘
 ```

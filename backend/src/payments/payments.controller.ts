@@ -31,7 +31,7 @@ export class PaymentsController {
    * POST /payments/callback
    *
    * This endpoint receives payment confirmations from Mobile Money providers
-   * (MTN, Orange Money, Wave, etc.). It is:
+   * (mix_by_yas, Moov Money, PayGateGlobal, etc.). It is:
    * - PUBLIC (no auth required, but signature verified)
    * - IDEMPOTENT (uses idempotencyKey to prevent double-charging)
    * - ATOMIC (creates Payment + updates Order + releases Escrow in one transaction)
@@ -42,8 +42,8 @@ export class PaymentsController {
    *   "orderId": "order-uuid",
    *   "amount": 1198,
    *   "status": "COMPLETED",
-   *   "provider": "MTN",
-   *   "transactionId": "MTN-TXN-123456",
+   *   "provider": "mix_by_yas",
+   *   "transactionId": "mix_by_yas-TXN-123456",
    *   "signature": "sha256-hex-string"
    * }
    *
@@ -65,7 +65,7 @@ export class PaymentsController {
       orderId: string;
       amount: number;
       status: 'COMPLETED' | 'FAILED' | 'PENDING';
-      provider: 'MTN' | 'ORANGE' | 'WAVE';
+      provider: 'mix_by_yas' | 'MOOV_MONEY' | 'PAYGATEGLOBAL';
       transactionId?: string;
       callbackData?: string;
       signature?: string;
@@ -88,8 +88,8 @@ export class PaymentsController {
       };
     } catch (error) {
       this.logger.error(
-        `[handlePaymentCallback] ❌ Error: ${error.message}`,
-        error.stack,
+        `[handlePaymentCallback] ❌ Error: ${error instanceof Error ? error.message : 'Unknown error'}`,
+        error instanceof Error ? error.stack : undefined,
       );
       throw error;
     }
@@ -121,7 +121,7 @@ export class PaymentsController {
         data: payment,
       };
     } catch (error) {
-      this.logger.error(`[getPaymentById] Error: ${error.message}`);
+      this.logger.error(`[getPaymentById] Error: ${error instanceof Error ? error.message : 'Unknown error'}`);
       throw error;
     }
   }
@@ -163,7 +163,7 @@ export class PaymentsController {
         data: result,
       };
     } catch (error) {
-      this.logger.error(`[listPayments] Error: ${error.message}`);
+      this.logger.error(`[listPayments] Error: ${error instanceof Error ? error.message : 'Unknown error'}`);
       throw error;
     }
   }
@@ -227,7 +227,7 @@ export class PaymentsController {
         data: refund,
       };
     } catch (error) {
-      this.logger.error(`[refundPayment] Error: ${error.message}`);
+      this.logger.error(`[refundPayment] Error: ${error instanceof Error ? error.message : 'Unknown error'}`);
       throw error;
     }
   }
@@ -244,7 +244,7 @@ export class PaymentsController {
    * Request:
    * {
    *   "amount": 50000,
-   *   "mobileProvider": "MTN",
+   *   "mobileProvider": "mix_by_yas",
    *   "mobileNumber": "+33612345678"
    * }
    *
@@ -264,7 +264,7 @@ export class PaymentsController {
     @Body()
     body: {
       amount: number;
-      mobileProvider: 'MTN' | 'ORANGE' | 'WAVE';
+      mobileProvider: 'mix_by_yas' | 'MOOV_MONEY' | 'PAYGATEGLOBAL';
       mobileNumber: string;
     },
     @CurrentUser() user: any,
@@ -305,7 +305,7 @@ export class PaymentsController {
         message: 'Payout request created. It will be processed shortly.',
       };
     } catch (error) {
-      this.logger.error(`[createPayoutRequest] Error: ${error.message}`);
+      this.logger.error(`[createPayoutRequest] Error: ${error instanceof Error ? error.message : 'Unknown error'}`);
       throw error;
     }
   }
@@ -394,4 +394,133 @@ export class PaymentsController {
       throw error;
     }
   }
-}
+  /**
+   * ============================================================================
+   * INITIATE PAYGATEGLOBAL PAYMENT
+   * ============================================================================
+   * POST /payments/paygateglobal/initiate
+   *
+   * Initiates a payment request to PayGateGlobal for FLOOZ/TMONEY.
+   * Protected: Authenticated users (RESELLER primarily)
+   *
+   * Request:
+   * {
+   *   "orderId": "order-uuid",
+   *   "paymentMethod": "payment_page" // or "direct"
+   * }
+   *
+   * Response:
+   * {
+   *   "success": true,
+   *   "paymentUrl": "https://paygateglobal.com/pay/...",
+   *   "txReference": "PGG-order123-1234567890"
+   * }
+   */
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('RESELLER', 'ADMIN')
+  @Post('paygateglobal/initiate')
+  async initiatePayGateGlobalPayment(
+    @Body() body: { orderId: string; paymentMethod?: 'direct' | 'payment_page' },
+  ) {
+    try {
+      this.logger.log(
+        `[initiatePayGateGlobalPayment] orderId=${body.orderId}, method=${body.paymentMethod || 'payment_page'}`,
+      );
+
+      const result = await this.paymentsService.initiatePayGateGlobalPayment(
+        body.orderId,
+        body.paymentMethod || 'payment_page',
+      );
+
+      if (result.success) {
+        this.logger.log(
+          `[initiatePayGateGlobalPayment] ✅ Payment initiated. txReference=${result.txReference}`,
+        );
+
+        return {
+          success: true,
+          data: {
+            paymentUrl: result.paymentUrl,
+            txReference: result.txReference,
+          },
+        };
+      } else {
+        this.logger.error(
+          `[initiatePayGateGlobalPayment] ❌ Payment initiation failed: ${result.error}`,
+        );
+
+        throw new HttpException(
+          {
+            success: false,
+            error: result.error,
+          },
+          HttpStatus.BAD_REQUEST,
+        );
+      }
+    } catch (error) {
+      this.logger.error(`[initiatePayGateGlobalPayment] Error: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      throw error;
+    }
+  }
+
+  /**
+   * ============================================================================
+   * PAYGATEGLOBAL CALLBACK WEBHOOK
+   * ============================================================================
+   * POST /payments/paygateglobal/callback
+   *
+   * Receives payment confirmations from PayGateGlobal.
+   * This endpoint is PUBLIC (no auth required) but should be protected by IP whitelist.
+   *
+   * Expected callback data:
+   * {
+   *   "tx_reference": "PGG-order123-1234567890",
+   *   "status": "SUCCESS",
+   *   "amount": 1000,
+   *   "currency": "XOF",
+   *   "phone_number": "22890123456",
+   *   "payment_type": "FLOOZ",
+   *   "transaction_id": "TXN123456",
+   *   "payment_date": "2024-01-01 12:00:00"
+   * }
+   */
+  @Public()
+  @Post('paygateglobal/callback')
+  @HttpCode(200)
+  async handlePayGateGlobalCallback(@Body() callbackData: any) {
+    try {
+      this.logger.log(
+        `[handlePayGateGlobalCallback] Received callback for tx_reference=${callbackData.tx_reference}`,
+      );
+
+      const result = await this.paymentsService.handlePayGateGlobalCallback(callbackData);
+
+      if (result.success) {
+        this.logger.log(
+          `[handlePayGateGlobalCallback] ✅ Callback processed. orderId=${result.orderId}, paymentId=${result.paymentId}`,
+        );
+
+        return {
+          success: true,
+          message: 'Callback processed successfully',
+          orderId: result.orderId,
+          paymentId: result.paymentId,
+        };
+      } else {
+        this.logger.error(
+          `[handlePayGateGlobalCallback] ❌ Callback processing failed: ${result.error}`,
+        );
+
+        throw new HttpException(
+          {
+            success: false,
+            error: result.error,
+          },
+          HttpStatus.BAD_REQUEST,
+        );
+      }
+    } catch (error) {
+      this.logger.error(`[handlePayGateGlobalCallback] Error: ${error.message}`);
+      throw error;
+    }
+  }}

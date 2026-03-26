@@ -5,7 +5,7 @@
 Complete payment system for Deka social-commerce platform featuring:
 - **Idempotent webhook callbacks** (prevent double-charging)
 - **Atomic transactions** (Payment + Escrow release in single DB action)
-- **Multi-provider support** (MTN, Orange Money, Wave)
+- **Multi-provider support** (mix_by_yas, Moov Money)
 - **Full audit trail** (all payment actions logged)
 - **Refund management** (full & partial refunds)
 - **Wallet payouts** (commission & earnings withdrawal)
@@ -15,7 +15,7 @@ Complete payment system for Deka social-commerce platform featuring:
 ## Architecture
 
 ```
-Mobile Money Provider (MTN/Orange/Wave)
+Mobile Money Provider (mix_by_yas/Moov Money)
               ↓
          (Webhook)
               ↓
@@ -54,8 +54,8 @@ Receives payment confirmations from Mobile Money providers. This endpoint is:
   "orderId": "550e8400-e29b-41d4-a716-446655440000",
   "amount": 1198.50,
   "status": "COMPLETED",
-  "provider": "MTN",
-  "transactionId": "MTN-TXN-123456789",
+  "provider": "mix_by_yas",
+  "transactionId": "mix_by_yas-TXN-123456789",
   "callbackData": "{\"raw\": \"provider_data\"}",
   "signature": "sha256hexstring..."
 }
@@ -69,7 +69,7 @@ Receives payment confirmations from Mobile Money providers. This endpoint is:
 | `orderId` | UUID | ✅ | Order to confirm payment for |
 | `amount` | number | ✅ | Transaction amount |
 | `status` | enum | ✅ | `COMPLETED`, `FAILED`, or `PENDING` |
-| `provider` | enum | ✅ | `MTN`, `ORANGE`, or `WAVE` |
+| `provider` | enum | ✅ | `mix_by_yas`, `MOOV_MONEY` |
 | `transactionId` | string | ❌ | Provider's transaction ID |
 | `callbackData` | string | ❌ | Raw callback payload for audit |
 | `signature` | string | ❌ | HMAC SHA256(orderId:amount:status) |
@@ -104,12 +104,12 @@ Receives payment confirmations from Mobile Money providers. This endpoint is:
 curl -X POST http://localhost:3000/payments/callback \
   -H "Content-Type: application/json" \
   -d '{
-    "idempotencyKey": "mtn-web-20260326-1234",
+    "idempotencyKey": "mix_by_yas-web-20260326-1234",
     "orderId": "550e8400-e29b-41d4-a716-446655440000",
     "amount": 1198.50,
     "status": "COMPLETED",
-    "provider": "MTN",
-    "transactionId": "MTN-TXN-20260326-9999",
+    "provider": "mix_by_yas",
+    "transactionId": "mix_by_yas-TXN-20260326-9999",
     "signature": "abc123def456..."
   }'
 ```
@@ -159,8 +159,8 @@ Authorization: Bearer {jwt_token}
     "userId": "user-uuid",
     "amount": "1198.50",
     "status": "COMPLETED",
-    "provider": "MTN",
-    "transactionId": "MTN-TXN-123456789",
+    "provider": "mix_by_yas",
+    "transactionId": "mix_by_yas-TXN-123456789",
     "createdAt": "2026-03-26T10:30:00Z",
     "updatedAt": "2026-03-26T10:30:05Z",
     "order": {
@@ -295,7 +295,7 @@ Request withdrawal of wallet balance to Mobile Money account. Protected: Revende
 ```json
 {
   "amount": 50000,
-  "mobileProvider": "MTN",
+  "mobileProvider": "mix_by_yas",
   "mobileNumber": "+33612345678"
 }
 ```
@@ -305,7 +305,7 @@ Request withdrawal of wallet balance to Mobile Money account. Protected: Revende
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
 | `amount` | number | ✅ | Amount to withdraw (must be > 0) |
-| `mobileProvider` | enum | ✅ | `MTN`, `ORANGE`, `WAVE` |
+| `mobileProvider` | enum | ✅ | `mix_by_yas`, `MOOV_MONEY` |
 | `mobileNumber` | string | ✅ | Destination phone (international format) |
 
 #### Response
@@ -348,7 +348,7 @@ curl -X POST http://localhost:3000/payments/payouts \
   -H "Authorization: Bearer {jwt_token}" \
   -d '{
     "amount": 50000,
-    "mobileProvider": "MTN",
+    "mobileProvider": "mix_by_yas",
     "mobileNumber": "+33612345678"
   }'
 ```
@@ -380,7 +380,7 @@ List all payout requests for the authenticated user.
         "id": "payout-uuid",
         "amount": "50000",
         "status": "PENDING",
-        "mobileProvider": "MTN",
+        "mobileProvider": "mix_by_yas",
         "mobileNumber": "+33612345678",
         "createdAt": "2026-03-26T10:40:00Z",
         "completedAt": null
@@ -406,7 +406,7 @@ Mobile Money provider confirms payout completion/failure. This is idempotent and
 ```json
 {
   "status": "COMPLETED",
-  "transactionId": "MTN-PAYOUT-20260326-8888",
+  "transactionId": "mix_by_yas-PAYOUT-20260326-8888",
   "errorMessage": null,
   "signature": "sha256hexstring..."
 }
@@ -499,7 +499,7 @@ model Payment {
   amount        Decimal  // Transaction amount
   status        PaymentStatus  // PENDING, COMPLETED, FAILED
   
-  provider      String   // MTN, ORANGE, WAVE
+  provider      String   // mix_by_yas, MOOV_MONEY
   transactionId String?  @unique
   idempotencyKey String  @unique  // Prevents double-charges
   
@@ -557,7 +557,7 @@ model PayoutRequest {
   amount          Decimal // Withdrawal amount
   status          String  // PENDING, PROCESSING, COMPLETED, FAILED
   
-  mobileProvider  String  // MTN, ORANGE, WAVE
+  mobileProvider  String  // mix_by_yas, MOOV_MONEY
   mobileNumber    String  // Destination phone
   
   payoutId        String? @unique  // Provider's transaction ID
@@ -581,8 +581,8 @@ curl -X POST http://localhost:3000/payments/callback \
     "orderId": "550e8400-e29b-41d4-a716-446655440000",
     "amount": 1198.50,
     "status": "COMPLETED",
-    "provider": "MTN",
-    "transactionId": "MTN-TXN-001"
+    "provider": "mix_by_yas",
+    "transactionId": "mix_by_yas-TXN-001"
   }'
 ```
 
@@ -624,7 +624,7 @@ curl -X POST http://localhost:3000/payments/payouts \
   -H "Authorization: Bearer {revendeur_jwt_token}" \
   -d '{
     "amount": 50000,
-    "mobileProvider": "MTN",
+    "mobileProvider": "mix_by_yas",
     "mobileNumber": "+33612345678"
   }'
 ```
@@ -733,7 +733,7 @@ WAVE_API_URL=https://api.sandbox.wave.com
 ✅ **Audit Trail** — Every payment action logged for compliance  
 ✅ **RBAC Protected** — Strict role-based access control  
 ✅ **Signature Verified** — Webhooks validated by HMAC SHA256  
-✅ **Multi-Provider** — Support MTN, Orange Money, Wave seamlessly  
+✅ **Multi-Provider** — Support MTN, Moov Money seamlessly  
 ✅ **Wallet Integration** — Commission tracking and payouts  
 ✅ **Error Handling** — Clear, consistent error responses  
 

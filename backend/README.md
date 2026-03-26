@@ -201,8 +201,8 @@ X-Signature: <sha256-signature>
   "orderId": "order-uuid",
   "amount": 1198,
   "status": "COMPLETED",
-  "provider": "MTN",
-  "transactionId": "MTN-TXN-123456"
+  "provider": "mix_by_yas",
+  "transactionId": "mix_by_yas-TXN-123456"
 }
 
 Response 201 Created:
@@ -282,7 +282,7 @@ Authorization: Bearer <token>
 
 {
   "amount": 10000,
-  "mobileProvider": "MTN",
+  "mobileProvider": "mix_by_yas",
   "mobileNumber": "+212611111111"
 }
 

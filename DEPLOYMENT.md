@@ -158,7 +158,7 @@ SENTRY_DSN="https://xxx@sentry.io/yyy"
 LOG_LEVEL="info"
 
 # Payment Gateway (use test keys initially)
-MTN_API_KEY="$MTN_PROD_KEY"
+MTN_API_KEY="$MIX_BY_YAS_PROD_KEY"
 ORANGE_API_KEY="$ORANGE_PROD_KEY"
 PAYMENT_WEBHOOK_SECRET="$WEBHOOK_SECRET"
 ```

@@ -267,7 +267,7 @@ See `backend/PAYMENTS_API.md` for complete API reference.
 
 ## 💳 Payment Flow
 
-1. **Customer pays** via Mobile Money (MTN, Orange, Wave)
+1. **Customer pays** via Mobile Money (MTN, Moov Money)
 2. **Webhook callback** received (idempotent via `idempotencyKey`)
 3. **Payment validated** and funds locked in escrow (PostgreSQL transaction)
 4. **Order prepared** by supplier

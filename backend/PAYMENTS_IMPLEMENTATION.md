@@ -11,7 +11,7 @@ A complete, production-ready payments API for Deka social-commerce platform with
 - ✅ **Comprehensive validation** (Zod schemas)
 - ✅ **Audit trail** (PaymentAudit model + logging)
 - ✅ **Error handling** (consistent, descriptive responses)
-- ✅ **Multi-provider support** (MTN, Orange Money, Wave)
+- ✅ **Multi-provider support** (mix_by_yas, Moov Money)
 
 ---
 
@@ -151,7 +151,7 @@ await paymentsService.refundPayment(paymentId, {
 // Revendeur/Supplier withdraw wallet balance
 await paymentsService.createPayoutRequest(userId, {
   amount: 50000,
-  mobileProvider: "MTN",
+  mobileProvider: "mix_by_yas",
   mobileNumber: "+33612345678"
 })
 // → Wallet -= 50000
@@ -258,7 +258,7 @@ model Payment {
   amount        Decimal  @db.Decimal(19, 4)
   status        PaymentStatus  // PENDING | COMPLETED | FAILED
   
-  provider      String   // MTN, ORANGE, WAVE
+  provider      String   // mix_by_yas, MOOV_MONEY
   transactionId String?  @unique
   idempotencyKey String  @unique  // ← IDEMPOTENCY KEY
   callbackData  String?
@@ -333,7 +333,7 @@ npm run start:dev
 # Test payment callback
 curl -X POST http://localhost:3000/payments/callback \
   -H "Content-Type: application/json" \
-  -d '{"idempotencyKey":"test-001","orderId":"...","amount":1000,"status":"COMPLETED","provider":"MTN"}'
+  -d '{"idempotencyKey":"test-001","orderId":"...","amount":1000,"status":"COMPLETED","provider":"mix_by_yas"}'
 
 # Should return 201 Created
 ```
@@ -360,7 +360,7 @@ curl -X POST http://localhost:3000/payments/callback \
     "orderId": "550e8400-e29b-41d4-a716-446655440000",
     "amount": 1198,
     "status": "COMPLETED",
-    "provider": "MTN"
+    "provider": "mix_by_yas"
   }'
 # Expected: 201 Created
 ```
@@ -395,7 +395,7 @@ curl -X POST http://localhost:3000/payments/payouts \
   -H "Content-Type: application/json" \
   -d '{
     "amount": 50000,
-    "mobileProvider": "MTN",
+    "mobileProvider": "mix_by_yas",
     "mobileNumber": "+33612345678"
   }'
 # Expected: 201 Created, wallet debited
@@ -478,8 +478,8 @@ POST /payments/payouts
 PAYMENT_WEBHOOK_SECRET=your-webhook-secret-key
 
 # Mobile Money Providers
-MTN_API_KEY=your-mtn-key
-MTN_API_URL=https://sandbox.momodeveloper.mtn.com
+MIX_BY_YAS_API_KEY=your-mix_by_yas-key
+MIX_BY_YAS_API_URL=https://api.mix_by_yas.com
 
 ORANGE_API_KEY=your-orange-key
 ORANGE_API_URL=https://staging-api.orange.com

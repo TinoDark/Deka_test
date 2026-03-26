@@ -267,7 +267,7 @@ model Payment {
   status          PaymentStatus @default(PENDING)
   
   // Mobile Money Gateway
-  provider        String    // MTN, ORANGE, WAVE, etc.
+  provider        String    // mix_by_yas, MOOV_MONEY, PAYGATEGLOBAL
   transactionId   String?   @unique
   idempotencyKey  String    @unique  // Prevent double-charges
   
@@ -299,12 +299,12 @@ model PayoutRequest {
   status          String    @default("pending")  // pending, processing, completed, failed
   
   // Mobile Money destination
-  mobileProvider  String    // MTN, ORANGE, WAVE
+  mobileProvider  String    // mix_by_yas, MOOV_MONEY, PAYGATEGLOBAL
   mobileNumber    String
   
   // Reference
   payoutId        String?   @unique
-  refund          Refund?
+  refund          Refund[]
   
   createdAt       DateTime  @default(now())
   processedAt     DateTime?
@@ -379,7 +379,7 @@ model DeliveryAgent {
   
   acceptedDeliveries Int   @default(0)
   completedDeliveries Int  @default(0)
-  rating          Float?   @db.Decimal(3, 2)
+  rating          Decimal?   @db.Decimal(3, 2)
   
   createdAt       DateTime  @default(now())
   updatedAt       DateTime  @updatedAt

@@ -177,7 +177,7 @@ this.notificationsGateway.emitAdminNotification('sync_completed', {
 // Notifier un utilisateur "offline-safe"
 this.notificationsGateway.emitUserNotification(userId, 'payout_completed', {
   amount: 50000,
-  provider: 'MTN',
+  provider: 'mix_by_yas',
 });
 
 // Notifier un update de colis à tous

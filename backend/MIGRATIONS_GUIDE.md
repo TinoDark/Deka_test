@@ -38,9 +38,9 @@ AWS_SECRET_ACCESS_KEY="your-secret"
 AWS_S3_BUCKET="deka-products"
 AWS_S3_CDN_URL="https://d123.cloudfront.net"
 
-# Mobile Money (exemple MTN)
-MTN_API_KEY="your-mtn-key"
-MTN_CALLBACK_URL="https://your-domain.com/payments/callback"
+# Mobile Money (exemple mix_by_yas)
+MIX_BY_YAS_API_KEY="your-mix_by_yas-key"
+MIX_BY_YAS_CALLBACK_URL="https://your-domain.com/payments/callback"
 
 # Server
 PORT=3000

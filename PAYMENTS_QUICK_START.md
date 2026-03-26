@@ -94,7 +94,7 @@ backend/prisma/
 ```
 - id, orderId, userId
 - amount, status (PENDING/COMPLETED/FAILED)
-- provider (MTN/ORANGE/WAVE)
+- provider (MTN/MOOV_MONEY)
 - transactionId, idempotencyKey ← IDEMPOTENCY
 - callbackData, refunds, audits ← RELATIONS
 ```

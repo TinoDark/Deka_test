@@ -31,7 +31,7 @@ export const PaymentCallbackSchema = z.object({
     .describe('Payment status from provider'),
 
   provider: z
-    .enum(['MTN', 'ORANGE', 'WAVE'])
+    .enum(['mix_by_yas', 'MOOV_MONEY', 'PAYGATEGLOBAL'])
     .describe('Mobile Money provider'),
 
   transactionId: z
@@ -83,7 +83,7 @@ export const PayoutRequestSchema = z.object({
     .describe('Amount to withdraw from wallet'),
 
   mobileProvider: z
-    .enum(['MTN', 'ORANGE', 'WAVE'])
+    .enum(['mix_by_yas', 'MOOV_MONEY', 'PAYGATEGLOBAL'])
     .describe('Mobile Money provider'),
 
   mobileNumber: z

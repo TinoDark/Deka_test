@@ -387,7 +387,7 @@ SMTP_PASS=your-app-password
 
 ### Setup Mobile Money Webhooks
 
-For MTN, Orange Money, Wave:
+For MTN, Moov Money:
 - Register your URLs in their dashboards:
   - `https://deka-backend.railway.app/payments/callback`
   - `https://deka-backend.railway.app/payments/payouts/webhook`

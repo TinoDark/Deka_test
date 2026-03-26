@@ -9,14 +9,14 @@ import {
 import { PrismaService } from '@/common/prisma/prisma.service';
 import { ConfigService } from '@nestjs/config';
 import * as crypto from 'crypto';
-import { Decimal } from '@prisma/client/runtime/library';
+import { PayGateGlobalService } from './paygateglobal.service';
 
 export interface PaymentCallbackDto {
   idempotencyKey: string;
   orderId: string;
   amount: number;
   status: 'COMPLETED' | 'FAILED' | 'PENDING';
-  provider: 'MTN' | 'ORANGE' | 'WAVE';
+  provider: 'mix_by_yas' | 'MOOV_MONEY' | 'PAYGATEGLOBAL';
   transactionId?: string;
   callbackData?: string;
   signature?: string;
@@ -30,7 +30,7 @@ export interface RefundRequestDto {
 
 export interface PayoutRequestDto {
   amount: number;
-  mobileProvider: 'MTN' | 'ORANGE' | 'WAVE';
+  mobileProvider: 'mix_by_yas' | 'MOOV_MONEY' | 'PAYGATEGLOBAL';
   mobileNumber: string;
 }
 
@@ -44,6 +44,7 @@ export class PaymentsService {
   constructor(
     private prisma: PrismaService,
     private configService: ConfigService,
+    private payGateGlobalService: PayGateGlobalService,
   ) {}
 
   /**
@@ -177,6 +178,165 @@ export class PaymentsService {
       ...payment,
       isNewPayment: true,
     };
+  }
+
+  /**
+   * ============================================================================
+   * INITIATE PAYGATEGLOBAL PAYMENT
+   * ============================================================================
+   * Initiates a payment request to PayGateGlobal for FLOOZ/TMONEY.
+   *
+   * Flow:
+   * 1. Validate order exists and is PENDING
+   * 2. Generate unique tx_reference
+   * 3. Call PayGateGlobal API (direct or payment page)
+   * 4. Return payment URL or direct response
+   */
+  async initiatePayGateGlobalPayment(
+    orderId: string,
+    paymentMethod: 'direct' | 'payment_page' = 'payment_page',
+  ): Promise<{
+    success: boolean;
+    paymentUrl?: string;
+    txReference?: string;
+    error?: string;
+  }> {
+    this.logger.log(
+      `[initiatePayGateGlobalPayment] orderId=${orderId}, method=${paymentMethod}`,
+    );
+
+    // ✅ STEP 1: Validate order
+    const order = await this.prisma.order.findUnique({
+      where: { id: orderId },
+      include: {
+        user: true,
+        items: true,
+      },
+    });
+
+    if (!order) {
+      throw new NotFoundException(`Order ${orderId} not found`);
+    }
+
+    if (order.status !== 'PENDING') {
+      throw new BadRequestException(
+        `Order status must be PENDING, current: ${order.status}`,
+      );
+    }
+
+    // ✅ STEP 2: Generate unique tx_reference
+    const txReference = `PGG-${orderId}-${Date.now()}`;
+
+    try {
+      // ✅ STEP 3: Call PayGateGlobal service
+      if (paymentMethod === 'direct') {
+        // For direct payment, we need phone number from user profile
+        // This would typically come from the request body
+        throw new BadRequestException(
+          'Direct payment requires phone number. Use payment_page method instead.',
+        );
+      } else {
+        // Payment page method - redirect user to PayGateGlobal hosted page
+        const paymentUrl = await this.payGateGlobalService.generatePaymentPageUrl({
+          amount: order.totalAmount.toNumber(),
+          description: `DEKA Order ${orderId}`,
+          identifier: txReference,
+          url: this.configService.get<string>('PAYGATEGLOBAL_CALLBACK_URL'),
+        });
+
+        this.logger.log(
+          `[initiatePayGateGlobalPayment] ✅ Payment page URL generated. txReference=${txReference}`,
+        );
+
+        return {
+          success: true,
+          paymentUrl,
+          txReference,
+        };
+      }
+    } catch (error) {
+      this.logger.error(
+        `[initiatePayGateGlobalPayment] ❌ Failed to initiate payment. txReference=${txReference}`,
+        error,
+      );
+
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Failed to initiate PayGateGlobal payment',
+      };
+    }
+  }
+
+  /**
+   * ============================================================================
+   * HANDLE PAYGATEGLOBAL CALLBACK
+   * ============================================================================
+   * Processes webhook callbacks from PayGateGlobal payment gateway.
+   *
+   * Expected callback data structure:
+   * {
+   *   "tx_reference": "PGG-order123-1234567890",
+   *   "status": "SUCCESS" | "FAILED" | "PENDING",
+   *   "amount": 1000,
+   *   "currency": "XOF",
+   *   "phone_number": "22890123456",
+   *   "payment_type": "FLOOZ" | "TMONEY",
+   *   "transaction_id": "TXN123456",
+   *   "payment_date": "2024-01-01 12:00:00"
+   * }
+   */
+  async handlePayGateGlobalCallback(callbackData: any): Promise<{
+    success: boolean;
+    orderId?: string;
+    paymentId?: string;
+    error?: string;
+  }> {
+    this.logger.log(
+      `[handlePayGateGlobalCallback] tx_reference=${callbackData.tx_reference}, status=${callbackData.status}`,
+    );
+
+    try {
+      // ✅ STEP 1: Process callback data using PayGateGlobal service
+      const processedData = this.payGateGlobalService.processCallback(callbackData);
+
+      // ✅ STEP 2: Extract order ID from tx_reference (format: PGG-{orderId}-{timestamp})
+      const txReferenceParts = processedData.txReference.split('-');
+      if (txReferenceParts.length < 3 || txReferenceParts[0] !== 'PGG') {
+        throw new BadRequestException(`Invalid tx_reference format: ${processedData.txReference}`);
+      }
+      const orderId = txReferenceParts.slice(1, -1).join('-'); // Handle order IDs with hyphens
+
+      // ✅ STEP 3: Process payment callback using existing logic
+      const result = await this.handlePaymentCallback({
+        idempotencyKey: processedData.txReference,
+        orderId,
+        amount: processedData.amount,
+        status: processedData.status,
+        provider: 'PAYGATEGLOBAL',
+        transactionId: processedData.identifier,
+        callbackData: JSON.stringify(callbackData),
+      });
+
+      this.logger.log(
+        `[handlePayGateGlobalCallback] ✅ Callback processed. orderId=${orderId}, paymentId=${result.id}`,
+      );
+
+      return {
+        success: true,
+        orderId,
+        paymentId: result.id,
+      };
+    } catch (error) {
+      this.logger.error(
+        `[handlePayGateGlobalCallback] ❌ Callback processing failed`,
+        error,
+      );
+
+      return {
+        success: false,
+        error: error.message || 'Failed to process PayGateGlobal callback',
+      };
+    }
   }
 
   /**

@@ -7,7 +7,7 @@
 A complete, production-grade payments API featuring:
 - Idempotent webhook callbacks (prevent double-charging)
 - Atomic PostgreSQL transactions
-- Multi-provider support (MTN, Orange Money, Wave)
+- Multi-provider support (MTN, Moov Money)
 - Full audit trail with PaymentAudit model
 - RBAC-protected endpoints
 - Comprehensive validation with Zod
@@ -184,7 +184,7 @@ Later: Mobile Money → POST /payments/payouts/{id}/callback
 ## 🏗️ Architecture Diagram
 
 ```
-Mobile Money Provider (MTN/Orange/Wave)
+Mobile Money Provider (MTN/Moov Money)
          ↓
     (HTTPS Webhook)
          ↓
@@ -230,7 +230,7 @@ model Payment {
   amount        Decimal  @db.Decimal(19, 4)
   status        PaymentStatus  // PENDING|COMPLETED|FAILED
   
-  provider      String   // MTN|ORANGE|WAVE
+  provider      String   // MTN|MOOV_MONEY
   transactionId String?  @unique
   idempotencyKey String  @unique  // ← IDEMPOTENCY KEY
   
@@ -479,7 +479,7 @@ npm test -- payments
 ✅ **Well documented** - 3 guides + inline comments  
 ✅ **Tested** - 20+ test cases  
 ✅ **Production ready** - Error handling, logging  
-✅ **Multi-provider** - MTN, Orange, Wave support  
+✅ **Multi-provider** - MTN, Moov Money support  
 
 ---
 
