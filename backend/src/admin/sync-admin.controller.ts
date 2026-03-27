@@ -9,12 +9,12 @@ import {
   Response,
 } from '@nestjs/common';
 import { JwtAuthGuard } from '@/common/guards/jwt-auth.guard';
-import { RolesGuard } from '@/common/guards/rbac.guard';
+import { RbacGuard } from '@/common/guards/rbac.guard';
 import { Roles } from '@/common/decorators/roles.decorator';
 import { SyncAdminService } from './sync-admin.service';
 
 @Controller('admin/syncs')
-@UseGuards(JwtAuthGuard, RolesGuard)
+@UseGuards(JwtAuthGuard, RbacGuard)
 @Roles('ADMIN')
 export class SyncAdminController {
   constructor(private syncAdminService: SyncAdminService) {}
@@ -64,7 +64,7 @@ export class SyncAdminController {
       throw new HttpException(
         {
           message: 'Erreur lors de la récupération des syncs',
-          error: error.message,
+          error: error instanceof Error ? error.message : 'Unknown error',
         },
         HttpStatus.BAD_REQUEST,
       );
@@ -114,7 +114,7 @@ export class SyncAdminController {
       throw new HttpException(
         {
           message: 'Sync not found',
-          error: error.message,
+          error: error instanceof Error ? error.message : 'Unknown error',
         },
         HttpStatus.NOT_FOUND,
       );
@@ -138,7 +138,7 @@ export class SyncAdminController {
       throw new HttpException(
         {
           message: 'Erreur lors de la récupération des stats',
-          error: error.message,
+          error: error instanceof Error ? error.message : 'Unknown error',
         },
         HttpStatus.BAD_REQUEST,
       );
@@ -172,7 +172,7 @@ export class SyncAdminController {
       throw new HttpException(
         {
           message: 'Export CSV failed',
-          error: error.message,
+          error: error instanceof Error ? error.message : 'Unknown error',
         },
         HttpStatus.NOT_FOUND,
       );

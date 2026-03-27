@@ -30,7 +30,7 @@ export class NotificationsGateway
   private readonly logger = new Logger(NotificationsGateway.name);
 
   @WebSocketServer()
-  server: Server;
+  server!: Server;
 
   private connectedClients: Map<string, Set<string>> = new Map(); // userId -> Set<socketIds>
   private socketToUser: Map<string, string> = new Map(); // socketId -> userId
@@ -89,8 +89,9 @@ export class NotificationsGateway
 
       return true;
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : 'Unknown auth error';
       this.logger.error('Auth error:', error);
-      socket.emit('auth_error', { error: error.message });
+      socket.emit('auth_error', { error: errorMsg });
       return false;
     }
   }

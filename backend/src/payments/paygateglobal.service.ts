@@ -57,6 +57,24 @@ export class PayGateGlobalService {
     });
   }
 
+  private get callbackUrl(): string {
+    const configuredUrl = this.configService.get<string>('PAYGATEGLOBAL_CALLBACK_URL');
+    if (configuredUrl) {
+      return configuredUrl;
+    }
+
+    const appBaseUrl = this.configService.get<string>('APP_BASE_URL');
+    if (appBaseUrl) {
+      return `${appBaseUrl.replace(/\/$/, '')}/payments/paygateglobal/callback`;
+    }
+
+    return 'http://localhost:3000/payments/paygateglobal/callback';
+  }
+
+  getDefaultCallbackUrl(): string {
+    return this.callbackUrl;
+  }
+
   /**
    * Initiate a payment request (Method 1: Direct API call)
    */
@@ -82,8 +100,9 @@ export class PayGateGlobalService {
         status: response.data.status,
       };
     } catch (error) {
-      this.logger.error(`PayGateGlobal payment initiation failed: ${error.message}`);
-      throw new Error(`PayGateGlobal payment initiation failed: ${error.message}`);
+      const errorMsg = error instanceof Error ? error.message : 'Unknown error';
+      this.logger.error(`PayGateGlobal payment initiation failed: ${errorMsg}`);
+      throw new Error(`PayGateGlobal payment initiation failed: ${errorMsg}`);
     }
   }
 
@@ -98,12 +117,15 @@ export class PayGateGlobalService {
     phone?: string;
     network?: 'FLOOZ' | 'TMONEY';
   }): string {
+    const callbackUrl =
+      params.url || this.configService.get<string>('PAYGATEGLOBAL_CALLBACK_URL') || this.callbackUrl;
+
     const queryParams = new URLSearchParams({
       token: this.apiKey,
       amount: params.amount.toString(),
       description: params.description || 'DEKA Payment',
       identifier: params.identifier,
-      ...(params.url && { url: params.url }),
+      ...(callbackUrl && { url: callbackUrl }),
       ...(params.phone && { phone: params.phone }),
       ...(params.network && { network: params.network }),
     });
@@ -134,8 +156,9 @@ export class PayGateGlobalService {
         payment_method: response.data.payment_method,
       };
     } catch (error) {
-      this.logger.error(`PayGateGlobal status check failed: ${error.message}`);
-      throw new Error(`PayGateGlobal status check failed: ${error.message}`);
+      const errorMsg = error instanceof Error ? error.message : 'Unknown error';
+      this.logger.error(`PayGateGlobal status check failed: ${errorMsg}`);
+      throw new Error(`PayGateGlobal status check failed: ${errorMsg}`);
     }
   }
 
@@ -162,8 +185,9 @@ export class PayGateGlobalService {
         payment_method: response.data.payment_method,
       };
     } catch (error) {
-      this.logger.error(`PayGateGlobal status check by identifier failed: ${error.message}`);
-      throw new Error(`PayGateGlobal status check by identifier failed: ${error.message}`);
+      const errorMsg = error instanceof Error ? error.message : 'Unknown error';
+      this.logger.error(`PayGateGlobal status check by identifier failed: ${errorMsg}`);
+      throw new Error(`PayGateGlobal status check by identifier failed: ${errorMsg}`);
     }
   }
 
@@ -185,8 +209,9 @@ export class PayGateGlobalService {
         tmoney: response.data.tmoney,
       };
     } catch (error) {
-      this.logger.error(`PayGateGlobal balance check failed: ${error.message}`);
-      throw new Error(`PayGateGlobal balance check failed: ${error.message}`);
+      const errorMsg = error instanceof Error ? error.message : 'Unknown error';
+      this.logger.error(`PayGateGlobal balance check failed: ${errorMsg}`);
+      throw new Error(`PayGateGlobal balance check failed: ${errorMsg}`);
     }
   }
 

@@ -15,7 +15,7 @@ import { PaymentsService } from './payments.service';
 import { Public } from '@/common/decorators/public.decorator';
 import { CurrentUser } from '@/common/decorators/current-user.decorator';
 import { JwtAuthGuard } from '@/common/guards/jwt-auth.guard';
-import { RolesGuard } from '@/common/guards/rbac.guard';
+import { RbacGuard } from '@/common/guards/rbac.guard';
 import { Roles } from '@/common/decorators/roles.decorator';
 
 @Controller('payments')
@@ -104,7 +104,7 @@ export class PaymentsController {
    * Retrieve details of a specific payment.
    * Protected: User can only see their own payments (RBAC enforced in service)
    */
-  @UseGuards(JwtAuthGuard, RolesGuard)
+  @UseGuards(JwtAuthGuard, RbacGuard)
   @Get(':id')
   async getPaymentById(
     @Param('id') paymentId: string,
@@ -135,7 +135,7 @@ export class PaymentsController {
    * List all payments for the authenticated user (reseller/supplier).
    * Supports filtering by status and pagination.
    */
-  @UseGuards(JwtAuthGuard, RolesGuard)
+  @UseGuards(JwtAuthGuard, RbacGuard)
   @Roles('RESELLER', 'SUPPLIER', 'ADMIN')
   @Get()
   async listPayments(
@@ -190,7 +190,7 @@ export class PaymentsController {
    *   "createdAt": "2026-03-26T10:30:00Z"
    * }
    */
-  @UseGuards(JwtAuthGuard, RolesGuard)
+  @UseGuards(JwtAuthGuard, RbacGuard)
   @Roles('ADMIN')
   @Post(':id/refund')
   @HttpCode(201)
@@ -256,7 +256,7 @@ export class PaymentsController {
    *   "createdAt": "2026-03-26T10:30:00Z"
    * }
    */
-  @UseGuards(JwtAuthGuard, RolesGuard)
+  @UseGuards(JwtAuthGuard, RbacGuard)
   @Roles('RESELLER', 'SUPPLIER')
   @Post('payouts')
   @HttpCode(201)
@@ -318,7 +318,7 @@ export class PaymentsController {
    *
    * List all payout requests for the authenticated user.
    */
-  @UseGuards(JwtAuthGuard, RolesGuard)
+  @UseGuards(JwtAuthGuard, RbacGuard)
   @Roles('RESELLER', 'SUPPLIER')
   @Get('payouts')
   async listPayouts(
@@ -343,7 +343,7 @@ export class PaymentsController {
         data: result,
       };
     } catch (error) {
-      this.logger.error(`[listPayouts] Error: ${error.message}`);
+      this.logger.error(`[listPayouts] Error: ${error instanceof Error ? error.message : 'Unknown error'}`);
       throw error;
     }
   }
@@ -390,7 +390,7 @@ export class PaymentsController {
         data: result,
       };
     } catch (error) {
-      this.logger.error(`[handlePayoutCallback] Error: ${error.message}`);
+      this.logger.error(`[handlePayoutCallback] Error: ${error instanceof Error ? error.message : 'Unknown error'}`);
       throw error;
     }
   }
@@ -416,7 +416,7 @@ export class PaymentsController {
    *   "txReference": "PGG-order123-1234567890"
    * }
    */
-  @UseGuards(JwtAuthGuard, RolesGuard)
+  @UseGuards(JwtAuthGuard, RbacGuard)
   @Roles('RESELLER', 'ADMIN')
   @Post('paygateglobal/initiate')
   async initiatePayGateGlobalPayment(
@@ -520,7 +520,9 @@ export class PaymentsController {
         );
       }
     } catch (error) {
-      this.logger.error(`[handlePayGateGlobalCallback] Error: ${error.message}`);
+      this.logger.error(`[handlePayGateGlobalCallback] Error: ${error instanceof Error ? error.message : 'Unknown error'}`);
       throw error;
     }
-  }}
+  }
+}
+

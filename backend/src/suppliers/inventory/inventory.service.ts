@@ -234,15 +234,7 @@ export class InventoryService {
       productsDeactivated++;
     }
 
-    // ÉTAPE 3 — Nettoyage du fichier
-    try {
-      fs.unlinkSync(filePath);
-    } catch (error: unknown) {
-      const err = error as Error;
-      console.error(`Failed to delete file: ${filePath}`, err.message);
-    }
-
-    // ÉTAPE 4 — Créer le rapport de sync
+    // ÉTAPE 3 — Créer le rapport de sync
     const syncReport = await this.prisma.syncReport.create({
       data: {
         supplierId,

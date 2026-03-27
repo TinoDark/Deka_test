@@ -8,6 +8,7 @@ import {
 } from '@nestjs/common';
 import { PrismaService } from '@/common/prisma/prisma.service';
 import { ConfigService } from '@nestjs/config';
+import { Decimal } from 'decimal.js';
 import * as crypto from 'crypto';
 import { PayGateGlobalService } from './paygateglobal.service';
 
@@ -103,12 +104,16 @@ export class PaymentsService {
       where: { id: dto.orderId },
       include: {
         items: true,
-        user: true,
+        reseller: true,
       },
     });
 
     if (!order) {
       throw new NotFoundException(`Order ${dto.orderId} not found`);
+    }
+
+    if (!order.resellerId) {
+      throw new BadRequestException(`Order ${dto.orderId} has no reseller attached`);
     }
 
     // ✅ STEP 4: Validate amount matches
@@ -126,7 +131,7 @@ export class PaymentsService {
       const newPayment = await tx.payment.create({
         data: {
           orderId: dto.orderId,
-          userId: order.userId,
+          userId: order.resellerId || '',
           amount: new Decimal(dto.amount),
           status: dto.status === 'COMPLETED' ? 'COMPLETED' : 'FAILED',
           provider: dto.provider,
@@ -209,7 +214,7 @@ export class PaymentsService {
     const order = await this.prisma.order.findUnique({
       where: { id: orderId },
       include: {
-        user: true,
+        reseller: true,
         items: true,
       },
     });
@@ -237,15 +242,23 @@ export class PaymentsService {
         );
       } else {
         // Payment page method - redirect user to PayGateGlobal hosted page
+        const callbackUrl =
+          this.configService.get<string>('PAYGATEGLOBAL_CALLBACK_URL') ||
+          this.payGateGlobalService.getDefaultCallbackUrl();
+
         const paymentUrl = await this.payGateGlobalService.generatePaymentPageUrl({
           amount: order.totalAmount.toNumber(),
           description: `DEKA Order ${orderId}`,
           identifier: txReference,
-          url: this.configService.get<string>('PAYGATEGLOBAL_CALLBACK_URL'),
+          url: callbackUrl,
         });
 
         this.logger.log(
           `[initiatePayGateGlobalPayment] ✅ Payment page URL generated. txReference=${txReference}`,
+        );
+
+        this.logger.log(
+          `[initiatePayGateGlobalPayment] Using callback URL: ${callbackUrl}`,
         );
 
         return {
@@ -327,6 +340,7 @@ export class PaymentsService {
         paymentId: result.id,
       };
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : 'Failed to process PayGateGlobal callback';
       this.logger.error(
         `[handlePayGateGlobalCallback] ❌ Callback processing failed`,
         error,
@@ -334,7 +348,7 @@ export class PaymentsService {
 
       return {
         success: false,
-        error: error.message || 'Failed to process PayGateGlobal callback',
+        error: errorMsg,
       };
     }
   }
@@ -353,7 +367,7 @@ export class PaymentsService {
             id: true,
             status: true,
             totalAmount: true,
-            userId: true,
+            resellerId: true,
             createdAt: true,
           },
         },
@@ -446,7 +460,6 @@ export class PaymentsService {
         order: {
           include: {
             items: true,
-            user: true,
           },
         },
         user: true,
@@ -507,7 +520,7 @@ export class PaymentsService {
         await tx.order.update({
           where: { id: payment.orderId },
           data: {
-            status: 'REFUNDED',
+            status: 'CANCELLED',
           },
         });
       }

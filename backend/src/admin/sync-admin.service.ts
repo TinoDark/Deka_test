@@ -191,7 +191,7 @@ export class SyncAdminService {
       sync.errors.length,
     ];
 
-    let csvContent = headers.map((h) => this.escapeCSV(h)).join('\n') + '\n\n';
+    let csvContent = headers.map((h) => this.escapeCSV(String(h))).join('\n') + '\n\n';
 
     // Section erreurs si présentes
     if (sync.errors.length > 0) {

@@ -110,7 +110,7 @@ export class InventoryController {
       throw new HttpException(
         {
           message: 'Erreur lors du traitement du fichier Excel',
-          error: error.message,
+          error: error instanceof Error ? error.message : 'Unknown error',
         },
         HttpStatus.BAD_REQUEST,
       );
@@ -177,7 +177,7 @@ export class InventoryController {
       throw new HttpException(
         {
           message: 'Erreur lors de la synchronisation des diffs',
-          error: error.message,
+          error: error instanceof Error ? error.message : 'Unknown error',
         },
         HttpStatus.BAD_REQUEST,
       );
