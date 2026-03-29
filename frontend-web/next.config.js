@@ -1,4 +1,2 @@
-module.exports = {
-  reactStrictMode: true,
-  swcMinify: true,
-};
+// This file has been moved to next.config.mjs for ESM compatibility
+
