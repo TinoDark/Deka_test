@@ -116,8 +116,6 @@ export default function AdminSyncDetailPageWithWS() {
       addRealtimeUpdate(`✗ Sync échoué: ${data.error}`);
     });
 
-    setSocket(newSocket);
-
     return () => {
       newSocket.close();
     };
