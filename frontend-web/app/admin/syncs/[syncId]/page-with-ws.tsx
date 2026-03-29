@@ -3,7 +3,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
 import { io } from 'socket.io-client';
-import type { Socket } from 'socket.io-client';
 import {
   ArrowLeft,
   Download,
