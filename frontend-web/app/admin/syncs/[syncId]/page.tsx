@@ -132,7 +132,7 @@ export default function AdminSyncDetailPage() {
     );
   }
 
-  const successRate = sync.errors.length === 0 ? 100 : 95;
+  // const successRate = sync.errors.length === 0 ? 100 : 95; // Calculated but not used
   const totalProcessed =
     sync.productsCreated + sync.productsUpdated + sync.productsDeactivated;
 

@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { BarChart3, AlertCircle, Filter, Search } from 'lucide-react';
+import { AlertCircle, Filter, Search } from 'lucide-react';
 
 interface Sync {
   id: string;

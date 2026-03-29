@@ -42,7 +42,7 @@ export default function AdminSyncDetailPageWithWS() {
   const [exportingCSV, setExportingCSV] = useState(false);
   const [wsStatus, setWsStatus] = useState<ConnectionStatus>('disconnected');
   const [realtimeUpdates, setRealtimeUpdates] = useState<string[]>([]);
-  const [socket, setSocket] = useState<Socket | null>(null);
+  // const [socket, setSocket] = useState<Socket | null>(null); // WebSocket managed via useEffect
 
   // Chargement initial du sync
   useEffect(() => {
@@ -81,9 +81,9 @@ export default function AdminSyncDetailPageWithWS() {
       newSocket.emit('subscribe', { room: 'admin-syncs' });
     });
 
-    newSocket.on('auth_error', (err) => {
+    newSocket.on('auth_error', (err: any) => {
       setWsStatus('disconnected');
-      addRealtimeUpdate(`✗ Auth failed: ${err.message}`);
+      addRealtimeUpdate(`✗ Auth failed: ${(err as any)?.message || 'Unknown error'}`);
     });
 
     newSocket.on('disconnect', () => {
@@ -180,8 +180,9 @@ export default function AdminSyncDetailPageWithWS() {
       window.URL.revokeObjectURL(url);
       addRealtimeUpdate('✓ Export CSV complété');
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Export failed');
-      addRealtimeUpdate(`✗ Export failed: ${err.message}`);
+      const errorMsg = err instanceof Error ? err.message : 'Export failed';
+      setError(errorMsg);
+      addRealtimeUpdate(`✗ Export failed: ${errorMsg}`);
     } finally {
       setExportingCSV(false);
     }

@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { useAuthStore } from '@/lib/store';
 import { useRouter } from 'next/navigation';
 import { Card, StatCard } from '@/components/Card';
-import { WalletService, OrderService, CatalogService } from '@/lib/services';
+import { WalletService, OrderService } from '@/lib/services';
 import Link from 'next/link';
 
 export default function ResellerDashboard() {
