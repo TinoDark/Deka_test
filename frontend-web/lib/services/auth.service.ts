@@ -32,7 +32,7 @@ export class AuthService {
   }
 
   static async signup(data: SignupData): Promise<LoginResponse> {
-    const response = await apiClient.post<LoginResponse>('/auth/signup', data);
+    const response = await apiClient.post<LoginResponse>('/auth/register', data);
     return response.data;
   }
 
