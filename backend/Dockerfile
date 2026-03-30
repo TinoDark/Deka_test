@@ -7,11 +7,8 @@ WORKDIR /app
 COPY package.json package-lock.json* ./
 RUN npm install --legacy-peer-deps
 
-# Copy source
+# Copy source (includes pre-generated Prisma client)
 COPY . .
-
-# Generate Prisma client
-RUN npm run prisma:generate
 
 # Build TypeScript
 RUN npm run build
