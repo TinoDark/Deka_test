@@ -1,49 +1,29 @@
 #!/bin/bash
 set -e
 
-echo "================================"
-echo "🔧 Deka Backend Startup"
-echo "================================"
+# Print every command before executing it so we can trace exactly where things fail
+set -x
 
-# Debug: Verify environment
-echo "📍 Working directory: $(pwd)"
-echo "📍 Node version: $(node --version)"
-echo "📍 npm version: $(npm --version)"
-
-# Debug: List directory contents
-echo ""
-echo "📂 Directory structure:"
-ls -la dist/ 2>/dev/null || echo "⚠️  dist/ directory not found!"
-echo "📂 Source files:"
-ls -la src/main.ts 2>/dev/null || echo "⚠️  src/main.ts not found!"
-
-# Check if .env exists
-echo ""
-if [ -f .env ]; then
-  echo "✅ .env file found"
-else
-  echo "⚠️  .env file not found"
-fi
-
-# Apply migrations
-echo ""
 echo "🔄 Applying database migrations..."
-if ! npx prisma migrate deploy; then
-  echo "❌ Migration failed!"
-  exit 1
-fi
+npx prisma migrate deploy
 
-echo ""
-echo "🚀 Starting Deka backend..."
-echo "================================"
+echo "✅ Migrations complete."
 
-# Start with better error handling
+# Verify the compiled entry point exists before attempting to run it
 if [ ! -f "dist/main.js" ]; then
-  echo "❌ ERROR: dist/main.js not found!"
-  echo "📂 Contents of dist/:"
-  ls -la dist/ 2>/dev/null || echo "dist/ doesn't exist"
+  echo "❌ ERROR: dist/main.js not found. The TypeScript build may have failed or the file was not copied into the image." >&2
+  echo "Contents of /app:" >&2
+  ls -la /app >&2
+  echo "Contents of /app/dist (if it exists):" >&2
+  ls -la /app/dist 2>&1 >&2 || echo "  /app/dist directory does not exist" >&2
   exit 1
 fi
 
-# Run with output
-exec node dist/main.js
+echo "🚀 Starting Deka backend..."
+node dist/main.js
+EXIT_CODE=$?
+
+if [ $EXIT_CODE -ne 0 ]; then
+  echo "❌ ERROR: node dist/main.js exited with code $EXIT_CODE" >&2
+  exit $EXIT_CODE
+fi
