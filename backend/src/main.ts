@@ -7,7 +7,9 @@ async function bootstrap() {
   
   try {
     console.log('📦 [Bootstrap] Creating NestJS application...');
-    const app = await NestFactory.create(AppModule);
+    const app = await NestFactory.create(AppModule, {
+      logger: ['error', 'warn', 'log', 'debug', 'verbose'],
+    });
     console.log('✅ [Bootstrap] NestJS application created successfully');
 
     console.log('🔐 [Bootstrap] Setting up global validation pipe...');

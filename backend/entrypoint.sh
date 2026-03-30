@@ -26,4 +26,16 @@ fi
 echo "🚀 Starting Deka backend..."
 echo "Node: $(node --version)"
 echo "dist/main.js exists: $(test -f dist/main.js && echo 'YES' || echo 'NO')"
-exec node dist/main.js
+echo ""
+echo "------- NODE OUTPUT STARTS -------"
+
+# Run Node and capture ALL output (both stdout and stderr)
+node dist/main.js 2>&1
+EXIT_CODE=$?
+echo "------- NODE OUTPUT ENDS -------"
+echo ""
+
+if [ $EXIT_CODE -ne 0 ]; then
+  echo "❌ ERROR: node dist/main.js exited with code $EXIT_CODE" >&2
+  exit $EXIT_CODE
+fi
