@@ -7,6 +7,9 @@ WORKDIR /app
 COPY package.json package-lock.json* ./
 RUN npm install --legacy-peer-deps
 
+# Install OpenSSL 1.1 (required by Prisma debian-openssl-1.1.x binaries)
+RUN apt-get update -y && apt-get install -y openssl && rm -rf /var/lib/apt/lists/*
+
 # Copy source
 COPY . .
 
