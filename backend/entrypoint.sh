@@ -5,7 +5,11 @@ set -e
 set -x
 
 echo "🔄 Applying database migrations..."
-npx prisma migrate deploy
+npx prisma migrate deploy --skip-generate 2>&1 || {
+  MIGRATE_EXIT=$?
+  echo "❌ Migrations failed with exit code $MIGRATE_EXIT" >&2
+  exit $MIGRATE_EXIT
+}
 
 echo "✅ Migrations complete."
 
@@ -20,10 +24,6 @@ if [ ! -f "dist/main.js" ]; then
 fi
 
 echo "🚀 Starting Deka backend..."
-node dist/main.js
-EXIT_CODE=$?
-
-if [ $EXIT_CODE -ne 0 ]; then
-  echo "❌ ERROR: node dist/main.js exited with code $EXIT_CODE" >&2
-  exit $EXIT_CODE
-fi
+echo "Node: $(node --version)"
+echo "dist/main.js exists: $(test -f dist/main.js && echo 'YES' || echo 'NO')"
+exec node dist/main.js
