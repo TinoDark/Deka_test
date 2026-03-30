@@ -2,7 +2,9 @@ import { Injectable, UnauthorizedException, BadRequestException } from '@nestjs/
 import { JwtService } from '@nestjs/jwt';
 import { PrismaService } from '../common/prisma/prisma.service';
 import * as bcrypt from 'bcryptjs';
-import { UserRole } from '@prisma/client';
+
+// Enum defined inline since Prisma export might not be available
+type UserRoleType = 'SUPPLIER' | 'RESELLER' | 'DELIVERY' | 'ADMIN';
 
 @Injectable()
 export class AuthService {

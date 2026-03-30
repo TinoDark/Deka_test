@@ -102,7 +102,7 @@ export class AgentKeyService {
       orderBy: { createdAt: 'desc' },
     });
 
-    return keys.map((k) => ({
+    return keys.map((k: any) => ({
       id: k.id,
       name: k.name,
       keyPreview: k.keyPreview,

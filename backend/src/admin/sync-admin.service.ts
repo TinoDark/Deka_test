@@ -133,14 +133,14 @@ export class SyncAdminService {
     });
 
     const totalSyncsBySource = {
-      EXCEL_UPLOAD: syncs.filter((s) => s.source === 'EXCEL_UPLOAD').length,
-      AGENT: syncs.filter((s) => s.source === 'AGENT').length,
-      DASHBOARD_MANUAL: syncs.filter((s) => s.source === 'DASHBOARD_MANUAL')
+      EXCEL_UPLOAD: syncs.filter((s: any) => s.source === 'EXCEL_UPLOAD').length,
+      AGENT: syncs.filter((s: any) => s.source === 'AGENT').length,
+      DASHBOARD_MANUAL: syncs.filter((s: any) => s.source === 'DASHBOARD_MANUAL')
         .length,
     };
 
     const totalProducts = syncs.reduce(
-      (acc, s) => ({
+      (acc: any, s: any) => ({
         created: acc.created + s.productsCreated,
         updated: acc.updated + s.productsUpdated,
         deactivated: acc.deactivated + s.productsDeactivated,
@@ -148,12 +148,12 @@ export class SyncAdminService {
       { created: 0, updated: 0, deactivated: 0 },
     );
 
-    const totalErrors = syncs.reduce((acc, s) => {
+    const totalErrors = syncs.reduce((acc: number, s: any) => {
       const errors = JSON.parse(s.errors || '[]');
       return acc + errors.length;
     }, 0);
 
-    const uniqueSuppliers = new Set(syncs.map((s) => s.supplierId));
+    const uniqueSuppliers = new Set(syncs.map((s: any) => s.supplierId));
 
     return {
       period: `Last ${days} days`,

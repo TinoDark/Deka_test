@@ -126,7 +126,7 @@ export class PaymentsService {
     }
 
     // ✅ STEP 5: Create Payment + Release Escrow (ATOMIC TRANSACTION)
-    const payment = await this.prisma.$transaction(async (tx) => {
+    const payment = await this.prisma.$transaction(async (tx: any) => {
       // Create payment record
       const newPayment = await tx.payment.create({
         data: {
@@ -488,7 +488,7 @@ export class PaymentsService {
     }
 
     // ✅ STEP 3: Process refund in transaction
-    const refund = await this.prisma.$transaction(async (tx) => {
+    const refund = await this.prisma.$transaction(async (tx: any) => {
       // Create refund record
       const newRefund = await tx.refund.create({
         data: {
@@ -599,7 +599,7 @@ export class PaymentsService {
     }
 
     // ✅ STEP 3: Create payout request in transaction
-    const payout = await this.prisma.$transaction(async (tx) => {
+    const payout = await this.prisma.$transaction(async (tx: any) => {
       const newPayout = await tx.payoutRequest.create({
         data: {
           userId,
@@ -679,7 +679,7 @@ export class PaymentsService {
     }
 
     // Update payout status
-    const updated = await this.prisma.$transaction(async (tx) => {
+    const updated = await this.prisma.$transaction(async (tx: any) => {
       const updatedPayout = await tx.payoutRequest.update({
         where: { id: payoutId },
         data: {
