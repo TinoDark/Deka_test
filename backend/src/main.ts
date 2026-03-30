@@ -23,6 +23,8 @@ async function bootstrap() {
   credentials: true,
 });
 
+console.log('CORS_ORIGIN =', process.env.CORS_ORIGIN);
+
   const port = process.env.API_PORT || 3000;
   await app.listen(port);
   console.log(`🚀 Deka Backend running on http://localhost:${port}`);
