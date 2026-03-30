@@ -1,10 +1,10 @@
 # Deka Backend Dockerfile
-FROM node:20-alpine
+FROM node:20-slim
 
 WORKDIR /app
 
 # Install OpenSSL 1.1 (required by Prisma)
-RUN apk add --no-cache openssl1.1
+RUN apt-get update && apt-get install -y --no-install-recommends libssl1.1 && rm -rf /var/lib/apt/lists/*
 
 # Install dependencies
 COPY package.json package-lock.json* ./
