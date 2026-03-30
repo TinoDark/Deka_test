@@ -1,8 +1,8 @@
 #!/bin/bash
 set -e
 
-echo "Running Prisma migrations..."
-npx prisma migrate deploy
+echo "🔄 Syncing Prisma schema to database..."
+npx prisma db push --skip-generate
 
-echo "Starting Deka backend..."
+echo "🚀 Starting Deka backend..."
 node dist/main.js
