@@ -19,6 +19,9 @@ RUN npm run prisma:generate
 # Build TypeScript
 RUN npm run build
 
+# Verify build output
+RUN if [ ! -f "dist/main.js" ]; then echo "ERROR: dist/main.js not created!" && ls -la dist/ && exit 1; fi
+
 # Copy entrypoint script
 COPY entrypoint.sh /app/entrypoint.sh
 RUN chmod +x /app/entrypoint.sh
