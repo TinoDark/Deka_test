@@ -4,6 +4,25 @@ set -e
 # Print every command before executing it so we can trace exactly where things fail
 set -x
 
+echo "================================"
+echo "🔧 Deka Backend Startup"
+echo "================================"
+
+# Configure DATABASE_URL for Railway SSL
+# Railway provides DB via proxy with self-signed certs, so we need sslmode=require
+if [ -n "$DATABASE_URL" ]; then
+  # Check if DATABASE_URL already has SSL parameters
+  if [[ ! "$DATABASE_URL" =~ "sslmode" ]]; then
+    # Add sslmode=require and sslaccept=strict for Railway
+    export DATABASE_URL="${DATABASE_URL}?sslmode=require"
+    echo "✅ Added SSL parameters to DATABASE_URL"
+  fi
+  echo "DATABASE_URL configured (first 50 chars): ${DATABASE_URL:0:50}..."
+else
+  echo "⚠️  WARNING: DATABASE_URL is not set!"
+fi
+
+echo ""
 echo "🔄 Applying database migrations..."
 npx prisma migrate deploy --skip-generate 2>&1 || {
   MIGRATE_EXIT=$?
