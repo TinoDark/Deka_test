@@ -15,10 +15,13 @@ async function bootstrap() {
   );
 
   // CORS
-  app.enableCors({
-    origin: process.env.CORS_ORIGIN?.split(',') || 'http://localhost:3000',
-    credentials: true,
-  });
+ app.enableCors({
+  origin: process.env.CORS_ORIGIN
+    ? process.env.CORS_ORIGIN.split(',')
+    : ['http://localhost:3000'],
+  methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
+  credentials: true,
+});
 
   const port = process.env.API_PORT || 3000;
   await app.listen(port);
