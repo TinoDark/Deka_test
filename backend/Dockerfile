@@ -19,6 +19,10 @@ RUN npm run prisma:generate
 # Build TypeScript
 RUN npm run build
 
+# Copy entrypoint script
+COPY entrypoint.sh /app/entrypoint.sh
+RUN chmod +x /app/entrypoint.sh
+
 EXPOSE 3000
 
-CMD ["npm", "run", "start:prod"]
+ENTRYPOINT ["/app/entrypoint.sh"]
