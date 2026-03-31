@@ -9,15 +9,26 @@ echo "🔧 Deka Backend Startup"
 echo "================================"
 
 # Configure DATABASE_URL for Railway SSL
-# Railway provides DB via proxy with self-signed certs, so we need sslmode=require
+# Railway provides DB via proxy with self-signed certs
 if [ -n "$DATABASE_URL" ]; then
-  # Check if DATABASE_URL already has SSL parameters
-  if [[ ! "$DATABASE_URL" =~ "sslmode" ]]; then
-    # Add sslmode=require and sslaccept=strict for Railway
-    export DATABASE_URL="${DATABASE_URL}?sslmode=require"
-    echo "✅ Added SSL parameters to DATABASE_URL"
+  echo "📍 Original DATABASE_URL: ${DATABASE_URL:0:80}..."
+  
+  # Check if DATABASE_URL already has query parameters
+  if [[ "$DATABASE_URL" == *"?"* ]]; then
+    # URL already has parameters, append with &
+    if [[ ! "$DATABASE_URL" =~ "sslmode" ]]; then
+      export DATABASE_URL="${DATABASE_URL}&sslmode=require&sslaccept=strict"
+      echo "✅ Added SSL parameters with & separator"
+    fi
+  else
+    # URL doesn't have parameters yet, append with ?
+    if [[ ! "$DATABASE_URL" =~ "sslmode" ]]; then
+      export DATABASE_URL="${DATABASE_URL}?sslmode=require&sslaccept=strict"
+      echo "✅ Added SSL parameters with ? separator"
+    fi
   fi
-  echo "DATABASE_URL configured (first 50 chars): ${DATABASE_URL:0:50}..."
+  
+  echo "📍 Modified DATABASE_URL: ${DATABASE_URL:0:80}..."
 else
   echo "⚠️  WARNING: DATABASE_URL is not set!"
 fi
@@ -27,6 +38,7 @@ echo "🔄 Applying database migrations..."
 npx prisma migrate deploy --skip-generate 2>&1 || {
   MIGRATE_EXIT=$?
   echo "❌ Migrations failed with exit code $MIGRATE_EXIT" >&2
+  cat /app/.env 2>/dev/null || echo "(no .env found)"
   exit $MIGRATE_EXIT
 }
 
