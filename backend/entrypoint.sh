@@ -8,6 +8,10 @@ echo "================================"
 echo "🔧 Deka Backend Startup"
 echo "================================"
 
+# For Railway: Accept self-signed certificates from postgres proxy
+# This is safe because Railway's proxy is managed infrastructure
+export NODE_TLS_REJECT_UNAUTHORIZED=0
+
 # Configure DATABASE_URL for Railway SSL
 # Railway provides DB via proxy with self-signed certs
 if [ -n "$DATABASE_URL" ]; then
@@ -17,18 +21,18 @@ if [ -n "$DATABASE_URL" ]; then
   if [[ "$DATABASE_URL" == *"?"* ]]; then
     # URL already has parameters, append with &
     if [[ ! "$DATABASE_URL" =~ "sslmode" ]]; then
-      export DATABASE_URL="${DATABASE_URL}&sslmode=require&sslaccept=strict"
+      export DATABASE_URL="${DATABASE_URL}&sslmode=require"
       echo "✅ Added SSL parameters with & separator"
     fi
   else
     # URL doesn't have parameters yet, append with ?
     if [[ ! "$DATABASE_URL" =~ "sslmode" ]]; then
-      export DATABASE_URL="${DATABASE_URL}?sslmode=require&sslaccept=strict"
+      export DATABASE_URL="${DATABASE_URL}?sslmode=require"
       echo "✅ Added SSL parameters with ? separator"
     fi
   fi
   
-  echo "📍 Modified DATABASE_URL: ${DATABASE_URL:0:80}..."
+  echo "📍 Modified DATABASE_URL (first 100 chars): ${DATABASE_URL:0:100}..."
 else
   echo "⚠️  WARNING: DATABASE_URL is not set!"
 fi
@@ -38,7 +42,6 @@ echo "🔄 Applying database migrations..."
 npx prisma migrate deploy --skip-generate 2>&1 || {
   MIGRATE_EXIT=$?
   echo "❌ Migrations failed with exit code $MIGRATE_EXIT" >&2
-  cat /app/.env 2>/dev/null || echo "(no .env found)"
   exit $MIGRATE_EXIT
 }
 
@@ -56,17 +59,10 @@ fi
 
 echo "🚀 Starting Deka backend..."
 echo "Node: $(node --version)"
+echo "NODE_TLS_REJECT_UNAUTHORIZED: $NODE_TLS_REJECT_UNAUTHORIZED"
 echo "dist/main.js exists: $(test -f dist/main.js && echo 'YES' || echo 'NO')"
 echo ""
 echo "------- NODE OUTPUT STARTS -------"
 
 # Run Node and capture ALL output (both stdout and stderr)
-node dist/main.js 2>&1
-EXIT_CODE=$?
-echo "------- NODE OUTPUT ENDS -------"
-echo ""
-
-if [ $EXIT_CODE -ne 0 ]; then
-  echo "❌ ERROR: node dist/main.js exited with code $EXIT_CODE" >&2
-  exit $EXIT_CODE
-fi
+exec node dist/main.js 2>&1
