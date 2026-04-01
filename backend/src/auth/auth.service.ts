@@ -4,7 +4,7 @@ import { PrismaService } from '../common/prisma/prisma.service';
 import * as bcrypt from 'bcryptjs';
 
 // Enum defined inline since Prisma export might not be available
-type UserRoleType = 'SUPPLIER' | 'RESELLER' | 'DELIVERY' | 'ADMIN';
+type UserRoleType = 'SUPPLIER' | 'RESELLER' | 'DELIVERY' | 'ADMIN' | 'supplier' | 'reseller' | 'delivery' | 'admin';
 
 @Injectable()
 export class AuthService {
@@ -50,12 +50,15 @@ export class AuthService {
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
+    // Normalize role to uppercase (Prisma enum expects uppercase values)
+    const normalizedRole = (role || 'RESELLER').toUpperCase() as UserRoleType;
+
     const user = await this.prisma.user.create({
       data: {
         email,
         passwordHash: hashedPassword,
         phone,
-        role,
+        role: normalizedRole,
       },
     });
 
