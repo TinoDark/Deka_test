@@ -3,8 +3,18 @@ import { JwtService } from '@nestjs/jwt';
 import { PrismaService } from '../common/prisma/prisma.service';
 import * as bcrypt from 'bcryptjs';
 
-// Enum defined inline since Prisma export might not be available
+// Accept both uppercase and lowercase, normalize to Prisma enum format
 type UserRoleType = 'SUPPLIER' | 'RESELLER' | 'DELIVERY' | 'ADMIN' | 'supplier' | 'reseller' | 'delivery' | 'admin';
+
+// Helper function to normalize role to valid Prisma enum
+function normalizeRole(role: string): 'SUPPLIER' | 'RESELLER' | 'DELIVERY' | 'ADMIN' {
+  const normalized = (role || 'RESELLER').toUpperCase();
+  const validRoles = ['SUPPLIER', 'RESELLER', 'DELIVERY', 'ADMIN'];
+  if (!validRoles.includes(normalized)) {
+    return 'RESELLER';
+  }
+  return normalized as 'SUPPLIER' | 'RESELLER' | 'DELIVERY' | 'ADMIN';
+}
 
 @Injectable()
 export class AuthService {
@@ -51,7 +61,7 @@ export class AuthService {
     const hashedPassword = await bcrypt.hash(password, 10);
 
     // Normalize role to uppercase (Prisma enum expects uppercase values)
-    const normalizedRole = (role || 'RESELLER').toUpperCase() as UserRoleType;
+    const normalizedRole = normalizeRole(role);
 
     const user = await this.prisma.user.create({
       data: {
