@@ -106,4 +106,80 @@ export class AuthService {
       throw new UnauthorizedException('Invalid or expired token');
     }
   }
+
+  async requestPasswordReset(email: string) {
+    const user = await this.prisma.user.findUnique({
+      where: { email },
+    });
+
+    if (!user) {
+      // Don't reveal if email exists for security
+      return { message: 'If email exists, reset link has been sent' };
+    }
+
+    // Generate a password reset token (valid for 1 hour)
+    const resetToken = this.jwtService.sign(
+      { sub: user.id, email: user.email, type: 'password-reset' },
+      {
+        expiresIn: '1h',
+        secret: process.env.JWT_SECRET || 'jwt_secret_key',
+      }
+    );
+
+    // TODO: Send email with reset link
+    // const resetLink = `https://yourdomain.com/reset-password/${resetToken}`;
+    // await this.emailService.sendPasswordResetEmail(user.email, resetLink);
+
+    console.log(`[DEV] Password reset token for ${email}: ${resetToken}`);
+
+    return {
+      message: 'Password reset link has been sent to your email',
+      // Only for development - remove in production
+      resetToken: process.env.NODE_ENV === 'development' ? resetToken : undefined,
+    };
+  }
+
+  async resetPassword(token: string, newPassword: string) {
+    try {
+      // Verify the reset token
+      const decoded = this.jwtService.verify(token, {
+        secret: process.env.JWT_SECRET || 'jwt_secret_key',
+      }) as any;
+
+      // Verify it's a password-reset token
+      if (decoded.type !== 'password-reset') {
+        throw new BadRequestException('Invalid reset token');
+      }
+
+      // Find user
+      const user = await this.prisma.user.findUnique({
+        where: { id: decoded.sub },
+      });
+
+      if (!user) {
+        throw new BadRequestException('User not found');
+      }
+
+      // Validate password
+      if (!newPassword || newPassword.length < 6) {
+        throw new BadRequestException('Password must be at least 6 characters');
+      }
+
+      // Hash new password
+      const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+      // Update user password
+      await this.prisma.user.update({
+        where: { id: user.id },
+        data: { passwordHash: hashedPassword },
+      });
+
+      return { message: 'Password has been reset successfully' };
+    } catch (error: any) {
+      if (error.name === 'TokenExpiredError') {
+        throw new BadRequestException('Reset link has expired. Please request a new one.');
+      }
+      throw new BadRequestException('Invalid or expired reset link');
+    }
+  }
 }
