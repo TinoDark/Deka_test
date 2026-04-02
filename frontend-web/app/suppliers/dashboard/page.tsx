@@ -51,7 +51,7 @@ export default function SupplierDashboard() {
     return (
       <div className="flex items-center justify-center h-screen">
         <div className="text-center">
-          <div className="animate-spin text-4xl">⏳</div>
+          <div className="animate-spin text-4xl">...</div>
           <p className="text-gray-600 mt-4">Loading dashboard...</p>
         </div>
       </div>
@@ -63,7 +63,7 @@ export default function SupplierDashboard() {
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">Supplier Dashboard 📊</h1>
+          <h1 className="text-3xl font-bold text-gray-900">Supplier Dashboard</h1>
           <p className="text-gray-600 mt-2">Manage your inventory and orders</p>
         </div>
 
@@ -72,14 +72,14 @@ export default function SupplierDashboard() {
           <StatCard
             label="Active Products"
             value={stats?.activeProducts || 0}
-            icon="📦"
+            icon=""
             color="blue"
           />
-          <StatCard label="Pending Orders" value={stats?.pendingOrders || 0} icon="⏳" color="yellow" />
+          <StatCard label="Pending Orders" value={stats?.pendingOrders || 0} icon="" color="yellow" />
           <StatCard
             label="Total Revenue"
             value={`${(stats?.totalRevenue || 0).toLocaleString()} XAF`}
-            icon="💵"
+            icon=""
             color="green"
           />
         </div>
@@ -90,7 +90,6 @@ export default function SupplierDashboard() {
             href="/suppliers/inventory"
             className="p-4 bg-white border border-gray-200 rounded-lg hover:shadow-lg transition text-center"
           >
-            <span className="text-3xl block mb-2">📁</span>
             <h3 className="font-semibold text-gray-900">Manage Inventory</h3>
             <p className="text-sm text-gray-600">Add/update products via Excel</p>
           </Link>
@@ -99,7 +98,6 @@ export default function SupplierDashboard() {
             href="/suppliers/orders"
             className="p-4 bg-white border border-gray-200 rounded-lg hover:shadow-lg transition text-center"
           >
-            <span className="text-3xl block mb-2">📋</span>
             <h3 className="font-semibold text-gray-900">Orders to Prepare</h3>
             <p className="text-sm text-gray-600">Confirm preparation status</p>
           </Link>
@@ -108,7 +106,6 @@ export default function SupplierDashboard() {
             href="/suppliers/analytics"
             className="p-4 bg-white border border-gray-200 rounded-lg hover:shadow-lg transition text-center"
           >
-            <span className="text-3xl block mb-2">📈</span>
             <h3 className="font-semibold text-gray-900">Analytics</h3>
             <p className="text-sm text-gray-600">View sales performance</p>
           </Link>

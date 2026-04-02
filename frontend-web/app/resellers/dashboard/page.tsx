@@ -46,7 +46,7 @@ export default function ResellerDashboard() {
     return (
       <div className="flex items-center justify-center h-screen">
         <div className="text-center">
-          <div className="animate-spin text-4xl">⏳</div>
+          <div className="animate-spin text-4xl">...</div>
           <p className="text-gray-600 mt-4">Loading dashboard...</p>
         </div>
       </div>
@@ -58,7 +58,7 @@ export default function ResellerDashboard() {
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">Welcome, {user?.email}! 👋</h1>
+          <h1 className="text-3xl font-bold text-gray-900">Welcome, {user?.email}!</h1>
           <p className="text-gray-600 mt-2">Manage your store and track your earnings</p>
         </div>
 
@@ -67,25 +67,25 @@ export default function ResellerDashboard() {
           <StatCard
             label="Current Balance"
             value={`${wallet?.balance?.toLocaleString() || 0} XAF`}
-            icon="💰"
+            icon=""
             color="green"
           />
           <StatCard
             label="Today Earnings"
             value={`${stats?.dailyEarnings?.toLocaleString() || 0} XAF`}
-            icon="📈"
+            icon=""
             color="blue"
           />
           <StatCard
             label="Weekly Earnings"
             value={`${stats?.weeklyEarnings?.toLocaleString() || 0} XAF`}
-            icon="📊"
+            icon=""
             color="yellow"
           />
           <StatCard
             label="Total Earnings"
             value={`${stats?.totalEarnings?.toLocaleString() || 0} XAF`}
-            icon="🏆"
+            icon=""
             color="blue"
           />
         </div>
@@ -96,7 +96,6 @@ export default function ResellerDashboard() {
             href="/resellers/catalog"
             className="p-4 bg-white border border-gray-200 rounded-lg hover:shadow-lg transition text-center"
           >
-            <span className="text-3xl block mb-2">📦</span>
             <h3 className="font-semibold text-gray-900">Browse Catalog</h3>
             <p className="text-sm text-gray-600">Add products to your store</p>
           </Link>
@@ -105,7 +104,6 @@ export default function ResellerDashboard() {
             href="/resellers/wallet"
             className="p-4 bg-white border border-gray-200 rounded-lg hover:shadow-lg transition text-center"
           >
-            <span className="text-3xl block mb-2">💳</span>
             <h3 className="font-semibold text-gray-900">Wallet & Payouts</h3>
             <p className="text-sm text-gray-600">Withdraw your earnings</p>
           </Link>

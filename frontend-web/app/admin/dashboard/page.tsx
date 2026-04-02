@@ -49,7 +49,7 @@ export default function AdminDashboard() {
     return (
       <div className="flex items-center justify-center h-screen">
         <div className="text-center">
-          <div className="animate-spin text-4xl">⏳</div>
+          <div className="animate-spin text-4xl">...</div>
           <p className="text-gray-600 mt-4">Loading dashboard...</p>
         </div>
       </div>
@@ -61,7 +61,7 @@ export default function AdminDashboard() {
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">Admin Control Center 🎛️</h1>
+          <h1 className="text-3xl font-bold text-gray-900">Admin Control Center</h1>
           <p className="text-gray-600 mt-2">Platform management and monitoring</p>
         </div>
 
@@ -70,13 +70,13 @@ export default function AdminDashboard() {
           <StatCard
             label="Total Orders"
             value={stats?.totalOrders || 0}
-            icon="📋"
+            icon=""
             color="blue"
           />
           <StatCard
             label="Total Revenue"
             value={`${(stats?.totalRevenue || 0).toLocaleString()} XAF`}
-            icon="💰"
+            icon=""
             color="green"
           />
           <StatCard
@@ -86,7 +86,7 @@ export default function AdminDashboard() {
               (userStats?.activeResellers || 0) +
               (userStats?.activeDelivery || 0)
             }
-            icon="👥"
+            icon=""
             color="blue"
           />
         </div>
@@ -96,7 +96,7 @@ export default function AdminDashboard() {
           <StatCard
             label="Pending KYC"
             value={stats?.pendingKYC || 0}
-            icon="⏳"
+            icon=""
             color="yellow"
             trend={
               stats?.pendingKYC > 10
@@ -107,10 +107,10 @@ export default function AdminDashboard() {
           <StatCard
             label="Open Disputes"
             value={stats?.openDisputes || 0}
-            icon="⚠️"
+            icon=""
             color="red"
           />
-          <StatCard label="Suppliers" value={userStats?.suppliers || 0} icon="🏭" color="blue" />
+          <StatCard label="Suppliers" value={userStats?.suppliers || 0} icon="" color="blue" />
         </div>
 
         {/* Action Buttons */}
@@ -119,7 +119,6 @@ export default function AdminDashboard() {
             href="/admin/kyc"
             className="p-4 bg-white border border-gray-200 rounded-lg hover:shadow-lg transition text-center"
           >
-            <span className="text-3xl block mb-2">🆔</span>
             <h3 className="font-semibold text-gray-900 text-sm">KYC Management</h3>
           </Link>
 
@@ -127,7 +126,6 @@ export default function AdminDashboard() {
             href="/admin/disputes"
             className="p-4 bg-white border border-gray-200 rounded-lg hover:shadow-lg transition text-center"
           >
-            <span className="text-3xl block mb-2">⚖️</span>
             <h3 className="font-semibold text-gray-900 text-sm">Disputes</h3>
           </Link>
 
@@ -135,7 +133,6 @@ export default function AdminDashboard() {
             href="/admin/refunds"
             className="p-4 bg-white border border-gray-200 rounded-lg hover:shadow-lg transition text-center"
           >
-            <span className="text-3xl block mb-2">💳</span>
             <h3 className="font-semibold text-gray-900 text-sm">Refunds</h3>
           </Link>
 
@@ -143,7 +140,6 @@ export default function AdminDashboard() {
             href="/admin/analytics"
             className="p-4 bg-white border border-gray-200 rounded-lg hover:shadow-lg transition text-center"
           >
-            <span className="text-3xl block mb-2">📊</span>
             <h3 className="font-semibold text-gray-900 text-sm">Analytics</h3>
           </Link>
         </div>
@@ -152,7 +148,7 @@ export default function AdminDashboard() {
         <Card title={`KYC Approval Queue (${kycQueue.length}) pending`} className="mb-8">
           {kycQueue.length === 0 ? (
             <div className="text-center py-8">
-              <p className="text-gray-600">✅ All KYC requests processed</p>
+              <p className="text-gray-600">All KYC requests processed</p>
             </div>
           ) : (
             <div className="overflow-x-auto">
@@ -199,7 +195,7 @@ export default function AdminDashboard() {
         <Card title={`Open Disputes (${disputes.length})`}>
           {disputes.length === 0 ? (
             <div className="text-center py-8">
-              <p className="text-gray-600">✅ No open disputes</p>
+              <p className="text-gray-600">No open disputes</p>
             </div>
           ) : (
             <div className="space-y-4">

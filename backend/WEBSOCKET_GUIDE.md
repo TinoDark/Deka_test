@@ -1,6 +1,6 @@
-# 🔔 WebSocket Notifications — Guide d'utilisation
+# WebSocket Notifications — Guide d'utilisation
 
-## 📡 Vue d'ensemble
+## Vue d'ensemble
 
 Le système de notifications WebSocket permet une communication temps réel entre le serveur et les clients :
 
@@ -11,7 +11,7 @@ Le système de notifications WebSocket permet une communication temps réel entr
 
 ---
 
-## 🔌 Configuration côté serveur
+## Configuration côté serveur
 
 ### 1. Module WebSocket enregistré
 ```typescript
@@ -39,7 +39,7 @@ export class NotificationsGateway { ... }
 
 ---
 
-## 💻 Utilisation côté client
+## Utilisation côté client
 
 ### Installation
 
@@ -77,7 +77,7 @@ socket.on('auth_error', (data) => {
 
 ---
 
-## 🎯 Événements disponibles
+## Événements disponibles
 
 ### Pour les fournisseurs
 
@@ -150,7 +150,7 @@ socket.on('package_status_updated', (data) => {
 
 ---
 
-## 🔔 Émettre des événements depuis le serveur
+## Émettre des événements depuis le serveur
 
 Le Gateway WebSocket expose des méthodes pour notifier les clients :
 
@@ -186,7 +186,7 @@ this.notificationsGateway.emitPackageStatusUpdate('AAMMJJ-XXXX', 'DELIVERED');
 
 ---
 
-## 📦 Intégration avec le service Inventory (Sync Excel)
+## Intégration avec le service Inventory (Sync Excel)
 
 Lors d'un upload Excel, le gateway est appelé :
 
@@ -281,7 +281,7 @@ export function SyncUploadComponent() {
 
   return (
     <div>
-      {status === 'syncing' && <p>⏳ Synchronisation en cours...</p>}
+      {status === 'syncing' && <p>Synchronisation en cours...</p>}
       {status === 'done' && <p>✓ Sync complété: {report.productsCreated} produits</p>}
       {status === 'error' && <p>✗ Erreur de sync</p>}
     </div>
@@ -291,7 +291,7 @@ export function SyncUploadComponent() {
 
 ---
 
-## ✅ Checklist d'implémentation
+## Checklist d'implémentation
 
 - [x] Gateway WebSocket créé (`notifications.gateway.ts`)
 - [x] Module WebSocket enregistré
@@ -305,7 +305,7 @@ export function SyncUploadComponent() {
 
 ---
 
-## 🚀 Déploiement
+## Déploiement
 
 En production, assurez-vous que :
 
@@ -328,7 +328,7 @@ En production, assurez-vous que :
 
 ---
 
-## 📚 Ressources
+## Ressources
 
 - [Socket.io Documentation](https://socket.io/docs/)
 - [NestJS WebSockets](https://docs.nestjs.com/gateways)

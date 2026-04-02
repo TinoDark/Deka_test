@@ -1,13 +1,13 @@
-# 🚀 Guide d'Installation & Migration DB
+# Guide d'Installation & Migration DB
 
-## 1️⃣ Prérequis
+## Prérequis
 
 Assurez-vous d'avoir :
 - PostgreSQL 15+ en cours d'exécution
 - Une base de données créée ou une connection string valide
 - Variables d'environnement configurées (voir `.env.example`)
 
-## 2️⃣ Configuration `.env`
+## Configuration `.env`
 
 Créez un fichier `.env` à la racine du dossier `backend/` :
 
@@ -99,7 +99,7 @@ npm run start:prod
 
 ---
 
-## 📋 Modèles créés
+## Modèles créés
 
 Après les migrations, vous aurez les tables suivantes :
 
@@ -117,7 +117,7 @@ Après les migrations, vous aurez les tables suivantes :
 
 ---
 
-## ✅ Vérifier l'état
+## Vérifier l'état
 
 ```bash
 # Voir les migrations appliquées
@@ -129,7 +129,7 @@ npx prisma migrate reset --force
 
 ---
 
-## 🐛 Troubleshooting
+## Troubleshooting
 
 ### Erreur: "Can't reach database server"
 → Vérifier `DATABASE_URL` et que PostgreSQL est actif
@@ -145,7 +145,7 @@ npm run prisma:seed
 
 ---
 
-## 🚢 Production
+## Production
 
 En production, utilisez :
 

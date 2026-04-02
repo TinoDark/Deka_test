@@ -58,7 +58,7 @@ docker exec deka-minio mc mb /minio_data/deka-products
 
 ---
 
-## 🧪 Tester les endpoints
+## Tester les endpoints
 
 ### A. Générer un JWT (fournisseur)
 
@@ -146,7 +146,7 @@ curl -X POST http://localhost:3000/suppliers/inventory/agent-sync \
 
 ---
 
-## 🔍 Vérifier les résultats
+## Vérifier les résultats
 
 ### A. Consulter MinIO
 
@@ -178,7 +178,7 @@ docker logs -f deka-backend
 
 ---
 
-## 🐛 Dépannage
+## Dépannage
 
 ### MinIO bucket não existe
 
@@ -214,7 +214,7 @@ npm run prisma:migrate
 
 ---
 
-## 📊 Cas d'usage complète
+## Cas d'usage complète
 
 ### Workflow 1 : Upload initial
 
