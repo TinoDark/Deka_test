@@ -151,7 +151,7 @@ export default function AdminSyncDetailPage() {
           <div className="flex justify-between items-start">
             <div>
               <h1 className="text-4xl font-bold text-slate-900 mb-2">
-                📊 Détails de la synchronisation
+                Détails de la synchronisation
               </h1>
               <p className="text-lg text-slate-600">
                 {sync.supplierEmail} • {new Date(sync.syncedAt).toLocaleString('fr-FR')}
@@ -230,10 +230,10 @@ export default function AdminSyncDetailPage() {
               <div className="mt-1">
                 <span className="inline-block px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm font-medium">
                   {sync.source === 'EXCEL_UPLOAD'
-                    ? '📤 Upload Excel'
+                    ? 'Upload Excel'
                     : sync.source === 'AGENT'
-                    ? '🤖 Agent local'
-                    : '🖱️ Manual'}
+                    ? 'Agent local'
+                    : 'Manual'}
                 </span>
               </div>
             </div>

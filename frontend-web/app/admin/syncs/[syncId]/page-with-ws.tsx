@@ -254,7 +254,7 @@ export default function AdminSyncDetailPageWithWS() {
           <div className="flex justify-between items-start mb-4">
             <div>
               <h1 className="text-4xl font-bold text-slate-900 mb-2">
-                📊 Détails de la synchronisation
+                Détails de la synchronisation
               </h1>
               <p className="text-lg text-slate-600">
                 {sync.supplierEmail} • {new Date(sync.syncedAt).toLocaleString('fr-FR')}
@@ -329,10 +329,10 @@ export default function AdminSyncDetailPageWithWS() {
                   <p className="text-sm text-slate-600 font-semibold uppercase">Source</p>
                   <span className="inline-block mt-1 px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm font-medium">
                     {sync.source === 'EXCEL_UPLOAD'
-                      ? '📤 Upload Excel'
+                      ? 'Upload Excel'
                       : sync.source === 'AGENT'
-                      ? '🤖 Agent local'
-                      : '🖱️ Manual'}
+                      ? 'Agent local'
+                      : 'Manual'}
                   </span>
                 </div>
 

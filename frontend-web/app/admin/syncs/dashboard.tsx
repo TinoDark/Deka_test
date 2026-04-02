@@ -106,11 +106,11 @@ export default function AdminSyncsDashboard() {
   const getSourceLabel = (source: string) => {
     switch (source) {
       case 'EXCEL_UPLOAD':
-        return '📤 Upload Excel';
+        return 'Upload Excel';
       case 'AGENT':
-        return '🤖 Agent local';
+        return 'Agent local';
       case 'DASHBOARD_MANUAL':
-        return '🖱️ Manual';
+        return 'Manual';
       default:
         return source;
     }
@@ -133,7 +133,7 @@ export default function AdminSyncsDashboard() {
         {/* En-tête */}
         <div className="mb-8">
           <h1 className="text-4xl font-bold text-slate-900 mb-2">
-            📊 Tableau de bord Admin — Synchronisations
+            Synchronisations
           </h1>
           <p className="text-lg text-slate-600">
             Visualisez et analysez toutes les synchronisations d'inventaire
@@ -231,8 +231,8 @@ export default function AdminSyncsDashboard() {
                 className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:border-blue-500"
               >
                 <option value="">Tous les types</option>
-                <option value="EXCEL_UPLOAD">📤 Upload Excel</option>
-                <option value="AGENT">🤖 Agent local</option>
+                <option value="EXCEL_UPLOAD">Upload Excel</option>
+                <option value="AGENT">Agent local</option>
                 <option value="DASHBOARD_MANUAL">🖱️ Manual</option>
               </select>
             </div>
@@ -264,7 +264,7 @@ export default function AdminSyncsDashboard() {
                 disabled={loading}
                 className="w-full px-4 py-2 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 disabled:opacity-50"
               >
-                {loading ? '⏳ Chargement...' : '↻ Rafraîchir'}
+                {loading ? 'Chargement...' : 'Rafraîchir'}
               </button>
             </div>
           </div>

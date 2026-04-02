@@ -21,19 +21,41 @@ Application **Social-Commerce as a Service** permettant à des vendeurs indépen
 ## 2. RÔLES ET PERMISSIONS
 
 ### Fournisseur
-- Gérer son inventaire (activer/désactiver un produit)
-- Confirmer la préparation des colis
-- Consulter l'historique de ses ventes
+- **Opérations Inventaire**
+  - Gérer son inventaire (activer/désactiver un produit) ✅
+  - Uploader fichier Excel pour synchroniser les produits ✅
+  - Consulter l'historique de ses ventes ✅
+  
+- **KYC & Profil** ✅
+  - Soumettre son information KYC (nom, adresse, documents)
+  - Vérifier le statut de son KYC
+  
+- **Commandes**
+  - Confirmer la préparation des colis
+  - Consulter les commandes en attente
+  
 - **Interdit** : voir les clients finaux des revendeurs, modifier le prix final
+- **Pages** : Dashboard, Inventory, KYC, Orders
 - **Accès** : lecture/écriture sur ses propres produits uniquement
 
 ### Revendeur
-- Sélectionner des produits (curation du catalogue)
-- Personnaliser son URL de boutique
-- Suivre ses commissions (Wallet)
-- Soumettre son KYC
+- **Gestion Boutique** ✅
+  - Ajouter/supprimer des produits de sa boutique
+  - Consulter le catalogue global
+  - Personnaliser son URL de boutique
+  
+- **Gestion Financière** ✅
+  - Suivre ses commissions (Dashboard stats)
+  - Consulter son Wallet et l'historique de retraits
+  - Demander un retrait via Mobile Money ou virement
+  
+- **KYC & Vérification** ✅
+  - Soumettre son information KYC (identité personnelle)
+  - Valider son identité avant de pouvoir faire des retraits
+  
 - **Interdit** : modifier les prix, contacter les fournisseurs en direct
-- **Accès** : catalogue global + son propre portefeuille
+- **Pages** : Dashboard, Store (manage products), Wallet (payouts), KYC, Catalog
+- **Accès** : catalogue global + son propre portefeuille + ses produits en boutique
 
 ### Livreur / Agent Hub
 - Accepter une course
@@ -43,10 +65,30 @@ Application **Social-Commerce as a Service** permettant à des vendeurs indépen
 - **Accès** : uniquement les données nécessaires à la livraison
 
 ### Administrateur
-- Valider les comptes (KYC)
-- Gérer les litiges
-- Effectuer les remboursements manuels
-- Modérer le catalogue
+- **Gestion KYC** ✅
+  - Voir la file d'attente KYC (pending, approved, rejected)
+  - Examiner les documents KYC
+  - Approuver ou rejeter les demandes KYC
+  
+- **Gestion Litiges** ✅
+  - Voir tous les litiges (open, resolved, closed)
+  - Consulter les détails des litiges
+  - Résoudre les litiges avec justification
+  
+- **Gestion Remboursements** ✅
+  - Créer des remboursements manuels
+  - Consulter l'historique des remboursements
+  - Statuts : Pending, Completed, Failed
+  
+- **Synchronisation Inventaire** ✅
+  - Voir l'historique des syncs Excel (upload et agent)
+  - Consulter les rapports de synchronisation détaillés
+  
+- **Modération**
+  - Modérer le catalogue
+  - Gérer les utilisateurs
+  
+- **Pages** : Dashboard, KYC Management, Disputes, Refunds, Syncs
 - **Accès** : Super-Admin (accès total)
 
 ---

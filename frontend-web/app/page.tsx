@@ -27,7 +27,7 @@ export default function Home() {
       <nav className="bg-white shadow-sm border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex justify-between items-center">
-            <h1 className="text-2xl font-bold text-blue-600">🚀 DEKA</h1>
+            <h1 className="text-2xl font-bold text-blue-600">DEKA</h1>
             <div className="flex gap-4">
               <Link
                 href="/login"
@@ -82,14 +82,13 @@ export default function Home() {
           <div className="grid md:grid-cols-3 gap-8">
             {/* Supplier Card */}
             <div className="p-8 bg-gradient-to-br from-orange-50 to-orange-100 rounded-lg border border-orange-200">
-              <span className="text-4xl block mb-4">🏭</span>
               <h4 className="text-2xl font-bold text-gray-900 mb-4">For Suppliers</h4>
               <ul className="space-y-3 text-gray-700">
-                <li>✓ Liquidate inventory fast</li>
-                <li>✓ Reach thousands of resellers</li>
-                <li>✓ Manage stock digitally</li>
-                <li>✓ Track all orders in real-time</li>
-                <li>✓ Get paid automatically</li>
+                <li>Liquidate inventory fast</li>
+                <li>Reach thousands of resellers</li>
+                <li>Manage stock digitally</li>
+                <li>Track all orders in real-time</li>
+                <li>Get paid automatically</li>
               </ul>
             </div>
 
@@ -98,27 +97,25 @@ export default function Home() {
               <div className="absolute -top-4 left-1/2 transform -translate-x-1/2 px-4 py-1 bg-blue-600 text-white rounded-full text-sm font-bold">
                 Most Popular
               </div>
-              <span className="text-4xl block mb-4">🛍️</span>
               <h4 className="text-2xl font-bold text-gray-900 mb-4">For Resellers</h4>
               <ul className="space-y-3 text-gray-700">
-                <li>✓ Start with zero capital</li>
-                <li>✓ Access premium products</li>
-                <li>✓ Create your own store</li>
-                <li>✓ Earn 15-30% commission</li>
-                <li>✓ Withdraw earnings instantly</li>
+                <li>Start with zero capital</li>
+                <li>Access premium products</li>
+                <li>Create your own store</li>
+                <li>Earn 15-30% commission</li>
+                <li>Withdraw earnings instantly</li>
               </ul>
             </div>
 
             {/* Delivery Card */}
             <div className="p-8 bg-gradient-to-br from-green-50 to-green-100 rounded-lg border border-green-200">
-              <span className="text-4xl block mb-4">🚚</span>
               <h4 className="text-2xl font-bold text-gray-900 mb-4">For Delivery</h4>
               <ul className="space-y-3 text-gray-700">
-                <li>✓ Flexible work schedule</li>
-                <li>✓ Accept nearby deliveries</li>
-                <li>✓ Track packages easily</li>
-                <li>✓ Earn per delivery</li>
-                <li>✓ Offline mode available</li>
+                <li>Flexible work schedule</li>
+                <li>Accept nearby deliveries</li>
+                <li>Track packages easily</li>
+                <li>Earn per delivery</li>
+                <li>Offline mode available</li>
               </ul>
             </div>
           </div>

@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useAuthStore } from '@/lib/store';
 import { AuthService } from '@/lib/services';
 import { Card } from '@/components/Card';
+import { MapComponent } from '@/components/MapComponent';
 import Link from 'next/link';
 
 type Role = 'supplier' | 'reseller';
@@ -20,6 +21,9 @@ export default function SignupPage() {
     confirmPassword: '',
     fullName: '',
     phone: '',
+    storeLat: '',
+    storeLng: '',
+    storeAddress: '',
   });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -38,9 +42,23 @@ export default function SignupPage() {
     });
   };
 
+  const handleLocationSelect = (location: { lat: number; lng: number; address: string }) => {
+    setFormData({
+      ...formData,
+      storeLat: location.lat.toString(),
+      storeLng: location.lng.toString(),
+      storeAddress: location.address,
+    });
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
+
+    if (!formData.phone.trim()) {
+      setError('Phone number is required');
+      return;
+    }
 
     if (formData.password !== formData.confirmPassword) {
       setError('Passwords do not match');
@@ -93,15 +111,14 @@ export default function SignupPage() {
               onClick={() => handleRoleSelect('supplier')}
               className="p-6 border-2 border-gray-300 rounded-lg hover:border-blue-500 hover:bg-blue-50 transition flex flex-col items-center text-center"
             >
-              <span className="text-4xl mb-4">🏭</span>
               <h3 className="text-xl font-bold text-gray-900">Supplier</h3>
               <p className="text-gray-600 text-sm mt-2">
                 Sell your products through resellers. Liquidate inventory fast.
               </p>
               <ul className="text-sm text-gray-600 mt-4 space-y-1">
-                <li>✓ Manage inventory</li>
-                <li>✓ Track orders</li>
-                <li>✓ Receive payments</li>
+                <li>Manage inventory</li>
+                <li>Track orders</li>
+                <li>Receive payments</li>
               </ul>
             </button>
 
@@ -109,15 +126,14 @@ export default function SignupPage() {
               onClick={() => handleRoleSelect('reseller')}
               className="p-6 border-2 border-blue-500 border-solid rounded-lg bg-blue-50 hover:bg-blue-100 transition flex flex-col items-center text-center"
             >
-              <span className="text-4xl mb-4">🛍️</span>
               <h3 className="text-xl font-bold text-gray-900">Reseller</h3>
               <p className="text-gray-600 text-sm mt-2">
                 Sell premium products from suppliers. Build your own online store.
               </p>
               <ul className="text-sm text-gray-600 mt-4 space-y-1">
-                <li>✓ Zero capital</li>
-                <li>✓ Earn commissions</li>
-                <li>✓ Custom shop</li>
+                <li>Zero capital</li>
+                <li>Earn commissions</li>
+                <li>Custom shop</li>
               </ul>
             </button>
           </div>
@@ -175,7 +191,7 @@ export default function SignupPage() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Phone (optional)</label>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Phone</label>
             <input
               type="tel"
               name="phone"
@@ -183,8 +199,29 @@ export default function SignupPage() {
               onChange={handleChange}
               placeholder="+237699123456"
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+              required
             />
           </div>
+
+          {role === 'supplier' && (
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-3">
+                Store Location
+              </label>
+              <p className="text-sm text-gray-600 mb-3">
+                Click on the map or use "Get My Location" to set your store location
+              </p>
+              <MapComponent
+                onLocationSelect={handleLocationSelect}
+                height="300px"
+              />
+              {formData.storeAddress && (
+                <p className="text-sm text-green-600 mt-2">
+                  Address: {formData.storeAddress}
+                </p>
+              )}
+            </div>
+          )}
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">Password</label>

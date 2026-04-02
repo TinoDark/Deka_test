@@ -36,12 +36,12 @@ export default function InventoryUpload() {
       selectedFile.name.endsWith('.xls');
 
     if (!isValidFormat) {
-      setError('❌ Veuillez sélectionner un fichier Excel (.xlsx ou .xls)');
+      setError('Veuillez sélectionner un fichier Excel (.xlsx ou .xls)');
       return;
     }
 
     if (selectedFile.size > 10 * 1024 * 1024) {
-      setError('❌ Le fichier ne doit pas dépasser 10 MB');
+      setError('Le fichier ne doit pas dépasser 10 MB');
       return;
     }
 
@@ -52,7 +52,7 @@ export default function InventoryUpload() {
 
   const handleUpload = async () => {
     if (!file) {
-      setError('❌ Veuillez sélectionner un fichier');
+      setError('Veuillez sélectionner un fichier');
       return;
     }
 
@@ -82,7 +82,7 @@ export default function InventoryUpload() {
         fileInputRef.current.value = '';
       }
     } catch (err) {
-      setError(`❌ Erreur lors de l'upload: ${err instanceof Error ? err.message : 'Erreur inconnue'}`);
+      setError(`Erreur lors de l'upload: ${err instanceof Error ? err.message : 'Erreur inconnue'}`);
     } finally {
       setUploading(false);
     }
@@ -112,7 +112,7 @@ export default function InventoryUpload() {
         {/* En-tête */}
         <div className="mb-8">
           <h1 className="text-4xl font-bold text-slate-900 mb-2">
-            📦 Synchronisation Inventaire
+            Synchronisation Inventaire
           </h1>
           <p className="text-lg text-slate-600">
             Uploadez votre fichier Excel pour mettre à jour votre catalogue de produits
@@ -204,7 +204,7 @@ export default function InventoryUpload() {
         {report && (
           <div className="bg-white rounded-2xl shadow-lg p-8">
             <h2 className="text-2xl font-bold text-slate-900 mb-6">
-              📊 Rapport de synchronisation
+Rapport de synchronisation
             </h2>
 
             {/* Résumé principal */}
@@ -253,13 +253,13 @@ export default function InventoryUpload() {
             {/* Détails du rapport */}
             <div className="space-y-4 text-sm text-slate-600">
               <div className="flex justify-between">
-                <span>📅 Date synchronisation:</span>
+                <span>Date synchronisation:</span>
                 <span className="font-medium text-slate-900">
                   {new Date(report.syncedAt).toLocaleString('fr-FR')}
                 </span>
               </div>
               <div className="flex justify-between">
-                <span>📤 Source:</span>
+                <span>Source:</span>
                 <span className="font-medium text-slate-900">Upload manuel</span>
               </div>
             </div>
