@@ -63,7 +63,15 @@ export default function SignupPage() {
       localStorage.setItem('accessToken', response.accessToken);
       localStorage.setItem('refreshToken', response.refreshToken);
 
-      router.push(role === 'supplier' ? '/suppliers/dashboard' : '/resellers/dashboard');
+      // Use normalized role from response for consistent routing
+      const userRole = response.user.role?.toLowerCase() || 'reseller';
+      const redirectMap: Record<string, string> = {
+        supplier: '/suppliers/dashboard',
+        reseller: '/resellers/dashboard',
+        delivery: '/delivery',
+        admin: '/admin',
+      };
+      router.push(redirectMap[userRole] || '/');
     } catch (err: any) {
       setError(err.response?.data?.message || 'Signup failed');
     } finally {

@@ -27,14 +27,15 @@ export default function LoginPage() {
       localStorage.setItem('accessToken', response.accessToken);
       localStorage.setItem('refreshToken', response.refreshToken);
 
-      // Redirect based on role
+      // Redirect based on role (normalize to lowercase for comparison)
+      const role = response.user.role?.toLowerCase() || '';
       const dashboardMap: Record<string, string> = {
         admin: '/admin',
         supplier: '/suppliers/dashboard',
         reseller: '/resellers/dashboard',
         delivery: '/delivery',
       };
-      router.push(dashboardMap[response.user.role] || '/');
+      router.push(dashboardMap[role] || '/');
     } catch (err: any) {
       setError(err.response?.data?.message || 'Invalid credentials');
     } finally {
