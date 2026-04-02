@@ -22,6 +22,7 @@ export default function LoginPage() {
 
     try {
       const response = await AuthService.login({ email, password });
+      console.log("ROLE FROM BACKEND:", response.user.role);
       setToken(response.accessToken);
       setUser(response.user);
       localStorage.setItem('accessToken', response.accessToken);
