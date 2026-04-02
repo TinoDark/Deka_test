@@ -17,7 +17,7 @@ export default function AdminDashboard() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!user || user.role !== 'admin') {
+    if (!user || user.role?.toLowerCase() !== 'admin') {
       router.push('/login');
       return;
     }

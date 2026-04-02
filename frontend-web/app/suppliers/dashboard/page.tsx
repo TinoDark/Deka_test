@@ -16,7 +16,7 @@ export default function SupplierDashboard() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!user || user.role !== 'supplier') {
+    if (!user || user.role?.toLowerCase() !== 'supplier') {
       router.push('/login');
       return;
     }

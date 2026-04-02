@@ -31,7 +31,7 @@ export default function LoginPage() {
       // Redirect based on role (normalize to lowercase for comparison)
       const role = response.user.role?.toLowerCase() || '';
       const dashboardMap: Record<string, string> = {
-        admin: '/admin',
+        admin: '/admin/dashboard',
         supplier: '/suppliers/dashboard',
         reseller: '/resellers/dashboard',
         delivery: '/delivery',

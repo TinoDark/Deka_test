@@ -16,7 +16,7 @@ export default function ResellerDashboard() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!user || user.role !== 'reseller') {
+    if (!user || user.role?.toLowerCase() !== 'reseller') {
       router.push('/login');
       return;
     }
