@@ -78,7 +78,7 @@ describe('Payments Module', () => {
         // Mock order
         (prismaService.order.findUnique as jest.Mock).mockResolvedValue({
           id: orderId,
-          userId: 'user-uuid',
+          resellerId: 'user-uuid',
           totalAmount: new Decimal(1198.5),
           status: 'PENDING',
           items: [],
@@ -161,6 +161,7 @@ describe('Payments Module', () => {
         (prismaService.payment.findUnique as jest.Mock).mockResolvedValue(null);
         (prismaService.order.findUnique as jest.Mock).mockResolvedValue({
           id: orderId,
+          resellerId: 'user-uuid',
           totalAmount: new Decimal(1000),
           userId: 'user-uuid',
           status: 'PENDING',
