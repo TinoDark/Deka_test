@@ -2,6 +2,7 @@ import {
   Controller,
   Post,
   Get,
+  Patch,
   Delete,
   UseGuards,
   UseInterceptors,
@@ -18,6 +19,13 @@ import { JwtAuthGuard } from '@/common/guards/jwt-auth.guard';
 import { RbacGuard } from '@/common/guards/rbac.guard';
 import { Roles } from '@/common/decorators/roles.decorator';
 import { CurrentUser } from '@/common/decorators/current-user.decorator';
+import { InventoryService } from './inventory.service';
+import {
+  CreateProductDto,
+  UpdateProductDto,
+  CreateProductDtoSchema,
+  UpdateProductDtoSchema,
+} from './inventory.schemas';
 import { InventoryService } from './inventory.service';
 import { AgentKeyService } from './agent-key.service';
 import { SyncReportResponse } from './schemas';
@@ -232,5 +240,78 @@ export class InventoryController {
   async revokeAgentKey(@CurrentUser() user: any, @Param('keyId') keyId: string): Promise<{ message: string }> {
     await this.agentKeyService.revokeAgentKey(user.id, keyId);
     return { message: 'Agent key revoked successfully' };
+  }
+
+  // ============================================================================
+  // GESTION MANUELLE DES PRODUITS
+  // ============================================================================
+
+  /**
+   * GET /suppliers/inventory/products
+   * Liste tous les produits du fournisseur
+   */
+  @Get('products')
+  async getProducts(@CurrentUser() user: any): Promise<any[]> {
+    return this.inventoryService.getProductsBySupplier(user.id);
+  }
+
+  /**
+   * POST /suppliers/inventory/products
+   * Crée un nouveau produit manuellement
+   */
+  @Post('products')
+  async createProduct(
+    @CurrentUser() user: any,
+    @Body() productData: {
+      referenceInterne: string;
+      nomProduit: string;
+      description: string;
+      caracteristique?: string;
+      categorie?: string;
+      prixVente: number;
+      commission: number;
+      pourcentageCommission: number;
+      stockQuantity: number;
+      imageUrl?: string;
+    },
+  ): Promise<any> {
+    return this.inventoryService.createProductManually(user.id, productData);
+  }
+
+  /**
+   * PATCH /suppliers/inventory/products/:id
+   * Met à jour un produit existant
+   */
+  @Post('products/:id') // Utilise POST au lieu de PATCH pour Next.js
+  async updateProduct(
+    @CurrentUser() user: any,
+    @Param('id') productId: string,
+    @Body() productData: Partial<{
+      nomProduit: string;
+      description: string;
+      caracteristique?: string;
+      categorie?: string;
+      prixVente: number;
+      commission: number;
+      pourcentageCommission: number;
+      stockQuantity: number;
+      imageUrl?: string;
+      isActive: boolean;
+    }>,
+  ): Promise<any> {
+    return this.inventoryService.updateProductManually(user.id, productId, productData);
+  }
+
+  /**
+   * DELETE /suppliers/inventory/products/:id
+   * Supprime un produit
+   */
+  @Delete('products/:id')
+  async deleteProduct(
+    @CurrentUser() user: any,
+    @Param('id') productId: string,
+  ): Promise<{ message: string }> {
+    await this.inventoryService.deleteProductManually(user.id, productId);
+    return { message: 'Product deleted successfully' };
   }
 }

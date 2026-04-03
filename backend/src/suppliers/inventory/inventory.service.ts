@@ -443,4 +443,219 @@ export class InventoryService {
       return false;
     }
   }
+
+  // ==========================================
+  // GESTION MANUELLE DES PRODUITS (CRUD)
+  // ==========================================
+
+  /**
+   * Obtient tous les produits d'un fournisseur
+   */
+  async getProductsBySupplier(supplierId: string): Promise<Product[]> {
+    return this.prisma.product.findMany({
+      where: { supplierId },
+      orderBy: { updatedAt: 'desc' },
+    });
+  }
+
+  /**
+   * Crée un produit manuellement
+   */
+  async createProductManually(
+    supplierId: string,
+    productData: CreateProductDto,
+  ): Promise<Product> {
+    // Vérifier que la référence interne n'existe pas déjà
+    const existingProduct = await this.prisma.product.findUnique({
+      where: {
+        supplierId_referenceInterne: {
+          supplierId,
+          referenceInterne: productData.referenceInterne,
+        },
+      },
+    });
+
+    if (existingProduct) {
+      throw new BadRequestException(
+        `Un produit avec la référence "${productData.referenceInterne}" existe déjà`,
+      );
+    }
+
+    // Traiter l'image si fournie
+    let imageCdnUrl: string | null = null;
+    if (productData.imageUrl) {
+      imageCdnUrl = await this.imageProcessor.processAndUploadImage(
+        productData.imageUrl,
+        supplierId,
+        productData.referenceInterne,
+      );
+    }
+
+    return this.prisma.product.create({
+      data: {
+        supplierId,
+        referenceInterne: productData.referenceInterne,
+        nomProduit: productData.nomProduit,
+        description: productData.description,
+        caracteristique: productData.caracteristique,
+        categorie: productData.categorie,
+        imageUrl: productData.imageUrl,
+        imageCdnUrl,
+        prixVente: productData.prixVente,
+        commission: productData.commission,
+        pourcentageCommission: productData.pourcentageCommission,
+        stockQuantity: productData.stockQuantity,
+        isActive: productData.stockQuantity > 0,
+        syncSource: 'DASHBOARD_MANUAL',
+        lastSyncedAt: new Date(),
+      },
+    });
+  }
+
+  /**
+   * Met à jour un produit manuellement
+   */
+  async updateProductManually(
+    supplierId: string,
+    productId: string,
+    updateData: UpdateProductDto,
+  ): Promise<Product> {
+    // Vérifier que le produit appartient au fournisseur
+    const product = await this.prisma.product.findFirst({
+      where: {
+        id: productId,
+        supplierId,
+      },
+    });
+
+    if (!product) {
+      throw new NotFoundException('Produit non trouvé');
+    }
+
+    // Si la référence interne change, vérifier qu'elle n'existe pas déjà
+    if (updateData.referenceInterne && updateData.referenceInterne !== product.referenceInterne) {
+      const existingProduct = await this.prisma.product.findUnique({
+        where: {
+          supplierId_referenceInterne: {
+            supplierId,
+            referenceInterne: updateData.referenceInterne,
+          },
+        },
+      });
+
+      if (existingProduct) {
+        throw new BadRequestException(
+          `Un produit avec la référence "${updateData.referenceInterne}" existe déjà`,
+        );
+      }
+    }
+
+    // Traiter l'image si elle change
+    let imageCdnUrl = product.imageCdnUrl;
+    if (updateData.imageUrl && updateData.imageUrl !== product.imageUrl) {
+      imageCdnUrl = await this.imageProcessor.processAndUploadImage(
+        updateData.imageUrl,
+        supplierId,
+        updateData.referenceInterne || product.referenceInterne,
+      );
+    }
+
+    return this.prisma.product.update({
+      where: { id: productId },
+      data: {
+        referenceInterne: updateData.referenceInterne,
+        nomProduit: updateData.nomProduit,
+        description: updateData.description,
+        caracteristique: updateData.caracteristique,
+        categorie: updateData.categorie,
+        imageUrl: updateData.imageUrl,
+        imageCdnUrl,
+        prixVente: updateData.prixVente,
+        commission: updateData.commission,
+        pourcentageCommission: updateData.pourcentageCommission,
+        stockQuantity: updateData.stockQuantity,
+        isActive: updateData.stockQuantity !== undefined ? updateData.stockQuantity > 0 : product.isActive,
+        syncSource: 'DASHBOARD_MANUAL',
+        lastSyncedAt: new Date(),
+      },
+    });
+  }
+
+  /**
+   * Supprime un produit manuellement
+   */
+  async deleteProductManually(supplierId: string, productId: string): Promise<void> {
+    // Vérifier que le produit appartient au fournisseur
+    const product = await this.prisma.product.findFirst({
+      where: {
+        id: productId,
+        supplierId,
+      },
+    });
+
+    if (!product) {
+      throw new NotFoundException('Produit non trouvé');
+    }
+
+    // Vérifier s'il y a des commandes en cours pour ce produit
+    const activeOrders = await this.prisma.orderItem.findMany({
+      where: {
+        productId,
+        status: { in: ['pending', 'paid', 'processing'] },
+      },
+    });
+
+    if (activeOrders.length > 0) {
+      throw new BadRequestException(
+        'Impossible de supprimer ce produit car il est référencé dans des commandes en cours',
+      );
+    }
+
+    await this.prisma.product.delete({
+      where: { id: productId },
+    });
+  }
+
+  /**
+   * Obtient les statistiques d'inventaire pour un fournisseur
+   */
+  async getInventoryStats(supplierId: string): Promise<{
+    totalProducts: number;
+    activeProducts: number;
+    inactiveProducts: number;
+    totalStockValue: number;
+    lastSyncDate: string | null;
+  }> {
+    const products = await this.prisma.product.findMany({
+      where: { supplierId },
+      select: {
+        isActive: true,
+        stockQuantity: true,
+        prixVente: true,
+        lastSyncedAt: true,
+      },
+    });
+
+    const totalProducts = products.length;
+    const activeProducts = products.filter(p => p.isActive).length;
+    const inactiveProducts = totalProducts - activeProducts;
+    const totalStockValue = products
+      .filter(p => p.isActive)
+      .reduce((sum, p) => sum + (p.stockQuantity * p.prixVente), 0);
+
+    const lastSyncDate = products.length > 0
+      ? products
+          .map(p => p.lastSyncedAt)
+          .filter(date => date !== null)
+          .sort((a, b) => b!.getTime() - a!.getTime())[0]?.toISOString() || null
+      : null;
+
+    return {
+      totalProducts,
+      activeProducts,
+      inactiveProducts,
+      totalStockValue,
+      lastSyncDate,
+    };
+  }
 }
