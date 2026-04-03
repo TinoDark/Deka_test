@@ -26,7 +26,6 @@ import {
   CreateProductDtoSchema,
   UpdateProductDtoSchema,
 } from './inventory.schemas';
-import { InventoryService } from './inventory.service';
 import { AgentKeyService } from './agent-key.service';
 import { SyncReportResponse } from './schemas';
 import * as path from 'path';

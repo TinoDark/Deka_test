@@ -1,7 +1,13 @@
-import { Injectable } from '@nestjs/common';
+import {
+  Injectable,
+  BadRequestException,
+  NotFoundException,
+} from '@nestjs/common';
 import { PrismaService } from '@/common/prisma/prisma.service';
+import { Product, OrderStatus } from '@prisma/client';
 import { ExcelRow, ExcelRowSchema, ExcelRowError, SyncReportResponse } from './schemas';
 import { ImageProcessorService } from './image-processor.service';
+import { CreateProductDto, UpdateProductDto } from './inventory.schemas';
 import * as XLSX from 'xlsx';
 import * as fs from 'fs';
 import { createHash } from 'crypto';
@@ -499,7 +505,7 @@ export class InventoryService {
         description: productData.description,
         caracteristique: productData.caracteristique,
         categorie: productData.categorie,
-        imageUrl: productData.imageUrl,
+        imageUrl: productData.imageUrl ?? '',
         imageCdnUrl,
         prixVente: productData.prixVente,
         commission: productData.commission,
@@ -601,7 +607,11 @@ export class InventoryService {
     const activeOrders = await this.prisma.orderItem.findMany({
       where: {
         productId,
-        status: { in: ['pending', 'paid', 'processing'] },
+        order: {
+          status: {
+            in: [OrderStatus.PENDING, OrderStatus.PAID, OrderStatus.PROCESSING],
+          },
+        },
       },
     });
 
@@ -641,7 +651,10 @@ export class InventoryService {
     const inactiveProducts = totalProducts - activeProducts;
     const totalStockValue = products
       .filter(p => p.isActive)
-      .reduce((sum, p) => sum + (p.stockQuantity * p.prixVente), 0);
+      .reduce(
+        (sum, p) => sum + p.stockQuantity * Number(p.prixVente),
+        0,
+      );
 
     const lastSyncDate = products.length > 0
       ? products
