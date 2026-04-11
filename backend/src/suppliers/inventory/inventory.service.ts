@@ -37,14 +37,35 @@ export class InventoryService {
       workbook.SheetNames[0];
     
     const worksheet = workbook.Sheets[worksheetName];
-    const rawData = XLSX.utils.sheet_to_json(worksheet);
+    const rawData = XLSX.utils.sheet_to_json(worksheet, {
+      defval: null,
+      blankrows: false,
+    });
 
     const rows: ExcelRow[] = [];
     const errors: ExcelRowError[] = [];
 
     rawData.forEach((rawRow: any, index: number) => {
+      // Ignore les lignes complètement vides
+      const rowValues = Object.values(rawRow);
+      const isEmptyRow = rowValues.every(
+        (value) => value === null || value === undefined || value === '',
+      );
+      if (isEmptyRow) {
+        return;
+      }
+
       // Normaliser les clés (lowercase, trim, sans accents)
       const normalizedRow = this.normalizeRowKeys(rawRow);
+
+      if (Object.keys(normalizedRow).length === 0) {
+        errors.push({
+          row: index + 2,
+          reference: 'UNKNOWN',
+          reason: 'Ligne vide ou colonnes introuvables',
+        });
+        return;
+      }
 
       // Valider chaque ligne avec le schéma zod
       const validation = ExcelRowSchema.safeParse(normalizedRow);
@@ -123,7 +144,20 @@ export class InventoryService {
     const allErrors = [...parsedData.errors];
 
     // ÉTAPE 1 — Pour chaque ligne valide
+    const seenReferences = new Set<string>();
     for (const row of parsedData.rows) {
+      if (seenReferences.has(row.reference_interne)) {
+        allErrors.push({
+          row:
+            parsedData.rows.indexOf(row) + 2,
+          reference: row.reference_interne,
+          reason:
+            'Référence interne dupliquée dans le fichier Excel ; seule la première occurrence est traitée',
+        });
+        continue;
+      }
+      seenReferences.add(row.reference_interne);
+
       try {
         // Chercher le produit existant
         const existingProduct = await this.prisma.product.findUnique({

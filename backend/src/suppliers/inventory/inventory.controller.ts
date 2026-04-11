@@ -63,19 +63,25 @@ export class InventoryController {
         },
       }),
       fileFilter: (req: any, file: any, cb: any) => {
-        // Accepter uniquement xlsx et xls
+        // Accepter xlsx, xls et ods
+        const allowedMimeTypes = [
+          'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+          'application/vnd.ms-excel',
+          'application/vnd.oasis.opendocument.spreadsheet',
+        ];
+
+        const fileName = file.originalname.toLowerCase();
         if (
-          file.mimetype ===
-            'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' ||
-          file.mimetype === 'application/vnd.ms-excel' ||
-          file.originalname.endsWith('.xlsx') ||
-          file.originalname.endsWith('.xls')
+          allowedMimeTypes.includes(file.mimetype) ||
+          fileName.endsWith('.xlsx') ||
+          fileName.endsWith('.xls') ||
+          fileName.endsWith('.ods')
         ) {
           cb(null, true);
         } else {
           cb(
             new BadRequestException(
-              'Seuls les fichiers Excel (.xlsx, .xls) sont acceptés',
+              'Seuls les fichiers Excel (.xlsx, .xls, .ods) sont acceptés',
             ),
             false,
           );
@@ -97,6 +103,12 @@ export class InventoryController {
     try {
       // Parser le fichier Excel
       const parsedData = this.inventoryService.parseExcelFile(file.path);
+
+      if (parsedData.rows.length === 0) {
+        throw new BadRequestException(
+          'Aucun produit valide n’a été trouvé dans le fichier Excel',
+        );
+      }
 
       // Effectuer la synchronisation
       const syncReport = await this.inventoryService.syncInventory(

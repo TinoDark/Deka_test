@@ -1,7 +1,8 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Plus, Edit, Trash2, Eye, Upload, AlertCircle, CheckCircle, Clock, Package, DollarSign, BarChart3 } from 'lucide-react';
+import Link from 'next/link';
+import { Plus, Edit, Trash2, Upload, AlertCircle, CheckCircle, Clock, Package, DollarSign, BarChart3 } from 'lucide-react';
 
 interface Product {
   id: string;
@@ -68,13 +69,12 @@ export default function InventoryManagement() {
         },
       });
 
-      if (response.ok) {
-        const data = await response.json();
-        setProducts(data);
-      } else {
-        console.error('Erreur lors du chargement des produits');
-        setProducts([]);
+      if (!response.ok) {
+        throw new Error('Impossible de charger les produits');
       }
+
+      const data = await response.json();
+      setProducts(data || []);
     } catch (error) {
       console.error('Erreur lors du chargement des produits:', error);
       setProducts([]);
@@ -289,13 +289,13 @@ export default function InventoryManagement() {
             <span>Ajouter un Produit</span>
           </button>
 
-          <a
+          <Link
             href="/suppliers/inventory/upload"
             className="flex items-center space-x-2 px-6 py-3 bg-green-600 text-white rounded-lg font-semibold hover:bg-green-700 transition-colors"
           >
             <Upload className="w-5 h-5" />
             <span>Importer Excel</span>
-          </a>
+          </Link>
 
           {syncReport && (
             <button

@@ -45,7 +45,10 @@ export const ExcelRowSchema = z.object({
   url_image: z
     .string()
     .url('L\'URL de l\'image doit être valide')
-    .trim(),
+    .trim()
+    .refine((value) => value.startsWith('https://'), {
+      message: 'L\'URL de l\'image doit commencer par https://',
+    }),
 });
 
 export type ExcelRow = z.infer<typeof ExcelRowSchema>;
