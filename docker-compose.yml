@@ -83,8 +83,8 @@ services:
   # ========================================================
   frontend-client:
     build:
-      context: ./frontend-web
-      dockerfile: Dockerfile.client
+      context: ./frontend-client
+      dockerfile: Dockerfile
     container_name: deka-frontend-client
     environment:
       NEXT_PUBLIC_API_URL: http://localhost:3000

@@ -1,7 +1,8 @@
 import Link from 'next/link';
+import { type Product } from '@/lib/api';
 
 interface ProductCardProps {
-  product: any;
+  product: Product;
 }
 
 export function ProductCard({ product }: ProductCardProps) {

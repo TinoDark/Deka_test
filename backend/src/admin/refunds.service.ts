@@ -78,6 +78,10 @@ export class RefundsService {
         throw new Error('Payment not found');
       }
 
+      if (!payment.userId) {
+        throw new Error('Refund payment is not associated with a user');
+      }
+
       const user = await this.prisma.user.findUnique({
         where: { id: payment.userId },
       });

@@ -28,18 +28,19 @@ export class WalletService {
           resellerId: userId,
           status: 'PROCESSING',
         },
-        select: { totalAmount: true },
+        select: { resellerCommission: true } as any,
       });
 
       const pendingCommission = pendingOrders.reduce(
-        (sum, order) => sum + parseFloat(order.totalAmount.toString()),
+        (sum, order: any) =>
+          sum + parseFloat(order.resellerCommission.toString()),
         0,
       );
 
       return {
         userId: user.id,
         balance: user.walletBalance,
-        pendingCommission: pendingCommission * 0.15, // 15% commission
+        pendingCommission: pendingCommission,
         totalEarned: user.walletBalance,
         currency: 'XAF',
       };

@@ -2,9 +2,10 @@
 
 import { useState } from 'react';
 import { useCartStore } from '@/lib/cartStore';
+import { type Product } from '@/lib/api';
 
 interface ProductDetailClientProps {
-  product: any;
+  product: Product;
 }
 
 export function ProductDetailClient({ product }: ProductDetailClientProps) {

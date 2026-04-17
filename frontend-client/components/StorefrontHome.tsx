@@ -1,20 +1,25 @@
 'use client';
 
-import { ProductCard } from './ProductCard';
 import { useMemo, useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { ProductCard } from './ProductCard';
+import { HeaderSearch } from './HeaderSearch';
+import { type Product } from '@/lib/api';
 
 interface StorefrontHomeProps {
-  products: Array<any>;
+  products: Product[];
 }
 
 export function StorefrontHome({ products }: StorefrontHomeProps) {
+  const router = useRouter();
   const [search, setSearch] = useState('');
   const [category, setCategory] = useState('');
 
-  const categories = useMemo(
-    () => Array.from(new Set(products.map((product) => product.categorie).filter(Boolean))),
-    [products],
-  );
+  const categories = useMemo(() => {
+    return Array.from(
+      new Set(products.map((product) => product.categorie).filter((value): value is string => Boolean(value))),
+    );
+  }, [products]);
 
   const filteredProducts = useMemo(
     () =>
@@ -31,35 +36,19 @@ export function StorefrontHome({ products }: StorefrontHomeProps) {
     [products, search, category],
   );
 
+  const handleShopSearch = (slug: string) => {
+    if (!slug) return;
+    router.push(`/boutique/${encodeURIComponent(slug)}`);
+  };
+
   return (
     <div className="space-y-8">
-      <div className="grid gap-4 md:grid-cols-[1.5fr_0.8fr]">
-        <div className="rounded-[32px] border border-slate-200 bg-white p-6 shadow-sm">
-          <label className="label">Rechercher un produit</label>
-          <input
-            type="search"
-            value={search}
-            onChange={(event) => setSearch(event.target.value)}
-            placeholder="Nom, catégorie, description..."
-            className="input"
-          />
-        </div>
-        <div className="rounded-[32px] border border-slate-200 bg-white p-6 shadow-sm">
-          <label className="label">Filtrer par catégorie</label>
-          <select
-            value={category}
-            onChange={(event) => setCategory(event.target.value)}
-            className="input"
-          >
-            <option value="">Toutes les catégories</option>
-            {categories.map((value) => (
-              <option key={value} value={value}>
-                {value}
-              </option>
-            ))}
-          </select>
-        </div>
-      </div>
+      <HeaderSearch
+        categories={categories}
+        onSearchChange={setSearch}
+        onCategoryChange={setCategory}
+        onShopSearch={handleShopSearch}
+      />
 
       <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
         {filteredProducts.length > 0 ? (

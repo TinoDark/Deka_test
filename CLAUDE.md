@@ -355,6 +355,11 @@ Monitoring   : Sentry (erreurs) + Grafana (métriques)
 - [ ] App livreur (scan + GPS)
 - [ ] Dashboard fournisseur (inventaire)
 
+### Architecture multi-site
+- `frontend-client` : application vitrine client indépendante, déployée sur un domaine séparé, consomme le même backend via `NEXT_PUBLIC_API_URL`
+- `frontend-web` : maintient les dashboards existants (fournisseur, revendeur, admin)
+- `docker-compose.yml` mis à jour pour construire `frontend-client` depuis `./frontend-client`
+
 ### Phase 4 — Admin & finitions
 - [ ] Interface admin (KYC, litiges, remboursements)
 - [ ] Notifications (SMS, Push, Email)

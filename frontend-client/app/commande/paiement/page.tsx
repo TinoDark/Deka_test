@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useCartStore } from '@/lib/cartStore';
 import { createOrder } from '@/lib/api';
@@ -10,6 +10,8 @@ export default function PaymentPage() {
   const [paymentMethod, setPaymentMethod] = useState('mobile_money');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [paymentUrl, setPaymentUrl] = useState<string | null>(null);
+  const [orderId, setOrderId] = useState<string | null>(null);
   const items = useCartStore((state) => state.items);
   const deliveryAddress = useCartStore((state) => state.deliveryAddress);
   const clear = useCartStore((state) => state.clear);
@@ -27,23 +29,85 @@ export default function PaymentPage() {
 
     try {
       const payload = {
-        delivery_address: deliveryAddress,
+        deliveryAddress,
+        distanceKm: 1,
+        deliveryType: 'DIRECT',
         items: items.map((item) => ({
-          product_id: item.productId,
+          productId: item.productId,
           quantity: item.quantite,
         })),
-        payment_method: paymentMethod,
+        paymentMethod,
       };
 
       const result = await createOrder(payload);
       clear();
-      router.push(`/commande/confirmation/${result.id}`);
-    } catch (err) {
+
+      if (result.payment?.paymentUrl) {
+        setOrderId(result.order.id);
+        setPaymentUrl(result.payment.paymentUrl);
+        return;
+      }
+
+      router.push(`/commande/confirmation/${result.order.id}`);
+    } catch {
       setError('Erreur lors de la création de la commande. Veuillez réessayer.');
     } finally {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    if (!paymentUrl) return;
+
+    const timer = window.setTimeout(() => {
+      window.location.href = paymentUrl;
+    }, 4000);
+
+    return () => window.clearTimeout(timer);
+  }, [paymentUrl]);
+
+  if (paymentUrl) {
+    return (
+      <main className="min-h-screen bg-slate-50">
+        <section className="mx-auto max-w-4xl px-4 py-14 sm:px-6 lg:px-8">
+          <div className="rounded-[32px] border border-slate-200 bg-white p-8 shadow-sm">
+            <p className="text-sm uppercase tracking-[0.3em] text-blue-600">Paiement</p>
+            <h1 className="mt-3 text-4xl font-bold text-slate-900">Préparation du paiement</h1>
+            <p className="mt-2 text-slate-600">
+              Votre commande <span className="font-semibold">{orderId}</span> a bien été créée.
+            </p>
+            <div className="mt-8 rounded-[32px] border border-slate-200 bg-slate-50 p-6 text-slate-800">
+              <p className="text-lg font-semibold">Redirection vers PayGateGlobal</p>
+              <p className="mt-3 text-sm text-slate-600">
+                Vous allez être redirigé vers la page de paiement dans quelques instants.
+              </p>
+              <p className="mt-4 text-sm text-slate-500">
+                Si la redirection ne démarre pas automatiquement, cliquez sur le bouton ci-dessous.
+              </p>
+            </div>
+            <div className="mt-8 flex flex-col gap-4 sm:flex-row">
+              <button
+                type="button"
+                onClick={() => {
+                  window.location.href = paymentUrl;
+                }}
+                className="inline-flex items-center justify-center rounded-3xl bg-blue-600 px-6 py-4 text-sm font-semibold text-white hover:bg-blue-700"
+              >
+                Payer maintenant
+              </button>
+              <button
+                type="button"
+                onClick={() => router.push(`/commande/confirmation/${orderId}`)}
+                className="inline-flex items-center justify-center rounded-3xl border border-slate-200 bg-white px-6 py-4 text-sm font-semibold text-slate-900 hover:bg-slate-100"
+              >
+                Finaliser sans payer
+              </button>
+            </div>
+          </div>
+        </section>
+      </main>
+    );
+  }
 
   return (
     <main className="min-h-screen bg-slate-50">

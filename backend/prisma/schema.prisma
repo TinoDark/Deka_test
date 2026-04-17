@@ -85,6 +85,7 @@ model User {
   products      Product[]
   orders        Order[]
   payments      Payment[]
+  walletTransactions WalletTransaction[]
   payoutRequests PayoutRequest[]
   refunds       Refund[]
   syncReports   SyncReport[] @relation("SyncReports")
@@ -192,9 +193,18 @@ model Order {
   resellerId      String?
   reseller        User?     @relation(fields: [resellerId], references: [id], onDelete: SetNull)
   
-  status          OrderStatus @default(PENDING)
-  totalAmount     Decimal   @db.Decimal(19, 4)
-  escrowBalance   Decimal   @default(0) @db.Decimal(19, 4)  // Funds locked until delivery
+  status                OrderStatus @default(PENDING)
+  productSubTotal       Decimal   @default(0) @db.Decimal(19, 4)
+  deliveryFee           Decimal   @default(0) @db.Decimal(19, 4)
+  gatewayFee            Decimal   @default(0) @db.Decimal(19, 4)
+  totalAmount           Decimal   @db.Decimal(19, 4)
+  netAmount             Decimal   @default(0) @db.Decimal(19, 4)
+  resellerCommission    Decimal   @default(0) @db.Decimal(19, 4)
+  adminProductFee       Decimal   @default(0) @db.Decimal(19, 4)
+  supplierRevenue       Decimal   @default(0) @db.Decimal(19, 4)
+  deliveryAdminFee      Decimal   @default(0) @db.Decimal(19, 4)
+  deliveryAgentFee      Decimal   @default(0) @db.Decimal(19, 4)
+  escrowBalance         Decimal   @default(0) @db.Decimal(19, 4)  // Funds locked until delivery
   
   // Customer info
   customerEmail   String
@@ -208,6 +218,7 @@ model Order {
   // Relationships
   items           OrderItem[]
   payments        Payment[]
+  walletTransactions WalletTransaction[]
   
   // Metadata
   notes           String?
@@ -261,8 +272,8 @@ model Payment {
   orderId         String
   order           Order     @relation(fields: [orderId], references: [id], onDelete: Cascade)
   
-  userId          String
-  user            User      @relation(fields: [userId], references: [id])
+  userId          String?
+  user            User?     @relation(fields: [userId], references: [id])
   
   amount          Decimal   @db.Decimal(19, 4)
   status          PaymentStatus @default(PENDING)
@@ -361,6 +372,22 @@ model PaymentAudit {
   @@index([paymentId])
   @@index([action])
   @@index([createdAt])
+}
+
+model WalletTransaction {
+  id           String    @id @default(uuid())
+  userId       String
+  user         User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  orderId      String?   
+  order        Order?    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  amount       Decimal   @db.Decimal(19, 4)
+  type         String    // RESELLER_COMMISSION, ADMIN_PRODUCT_FEE, SUPPLIER_REVENUE, DELIVERY_AGENT_FEE, GATEWAY_FEE
+  description  String
+  createdAt    DateTime  @default(now())
+
+  @@index([userId])
+  @@index([orderId])
+  @@index([type])
 }
 
 // ============================================================================

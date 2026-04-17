@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
 interface MapComponentProps {
   onLocationSelect?: (location: { lat: number; lng: number; address: string }) => void;
@@ -8,9 +8,41 @@ interface MapComponentProps {
   height?: string;
 }
 
+type GoogleLatLng = {
+  lat: () => number;
+  lng: () => number;
+};
+
+type GoogleMouseEvent = {
+  latLng: GoogleLatLng;
+};
+
+type GoogleLatLngLiteral = {
+  lat: number;
+  lng: number;
+};
+
+type GoogleMapInstance = {
+  setCenter: (location: GoogleLatLngLiteral) => void;
+  addListener: (event: string, callback: (event: GoogleMouseEvent) => void) => void;
+};
+
+type GoogleMarkerInstance = {
+  setPosition: (location: GoogleLatLngLiteral) => void;
+  addListener: (event: string, callback: (event: GoogleMouseEvent) => void) => void;
+};
+
 declare global {
   interface Window {
-    google: any;
+    google?: {
+      maps: {
+        Map: new (element: HTMLElement, options: Record<string, unknown>) => GoogleMapInstance;
+        Marker: new (options: Record<string, unknown>) => GoogleMarkerInstance;
+        Geocoder: new () => {
+          geocode: (request: { location: GoogleLatLngLiteral }) => Promise<{ results: Array<{ formatted_address?: string }> }>;
+        };
+      };
+    };
   }
 }
 
@@ -20,83 +52,91 @@ export function MapComponent({
   height = '400px',
 }: MapComponentProps) {
   const mapRef = useRef<HTMLDivElement>(null);
-  const [map, setMap] = useState<any>(null);
-  const [marker, setMarker] = useState<any>(null);
+  const initialMapPosition = useRef(initialLocation);
+  const [map, setMap] = useState<GoogleMapInstance | null>(null);
+  const [marker, setMarker] = useState<GoogleMarkerInstance | null>(null);
   const [selectedLocation, setSelectedLocation] = useState(initialLocation);
+
+  const updateLocation = useCallback(
+    async (location: GoogleLatLngLiteral, map: GoogleMapInstance, marker: GoogleMarkerInstance) => {
+      setSelectedLocation(location);
+      marker.setPosition(location);
+      map.setCenter(location);
+
+      if (!window.google?.maps?.Geocoder) return;
+
+      try {
+        const geocoder = new window.google.maps.Geocoder();
+        const result = await geocoder.geocode({ location });
+        const address = result.results[0]?.formatted_address || 'Adresse sélectionnée';
+
+        if (onLocationSelect) {
+          onLocationSelect({ lat: location.lat, lng: location.lng, address });
+        }
+      } catch (error) {
+        console.error('Geocoding error:', error);
+      }
+    },
+    [onLocationSelect],
+  );
 
   useEffect(() => {
     if (typeof window === 'undefined' || !mapRef.current) return;
+
+    const initializeMap = () => {
+      if (!mapRef.current || !window.google?.maps) return;
+
+      const google = window.google;
+      const newMap = new google.maps.Map(mapRef.current, {
+        zoom: 13,
+        center: initialMapPosition.current,
+        mapTypeControl: false,
+        streetViewControl: false,
+      });
+
+      const newMarker = new google.maps.Marker({
+        position: selectedLocation,
+        map: newMap,
+        title: 'Delivery location',
+        draggable: true,
+      });
+
+      newMarker.addListener('dragend', (event: GoogleMouseEvent) => {
+        const lat = event.latLng.lat();
+        const lng = event.latLng.lng();
+        updateLocation({ lat, lng }, newMap, newMarker);
+      });
+
+      newMap.addListener('click', (event: GoogleMouseEvent) => {
+        const lat = event.latLng.lat();
+        const lng = event.latLng.lng();
+        updateLocation({ lat, lng }, newMap, newMarker);
+      });
+
+      setMap(newMap);
+      setMarker(newMarker);
+    };
+
     if (!window.google) {
       const script = document.createElement('script');
       script.src = `https://maps.googleapis.com/maps/api/js?key=${process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY}&libraries=places`;
       script.async = true;
       script.defer = true;
-      script.onload = () => initializeMap();
+      script.onload = initializeMap;
       document.head.appendChild(script);
     } else {
       initializeMap();
     }
-  }, []);
-
-  const initializeMap = () => {
-    if (!mapRef.current) return;
-
-    const newMap = new window.google.maps.Map(mapRef.current, {
-      zoom: 13,
-      center: selectedLocation,
-      mapTypeControl: false,
-      streetViewControl: false,
-    });
-
-    const newMarker = new window.google.maps.Marker({
-      position: selectedLocation,
-      map: newMap,
-      title: 'Delivery location',
-      draggable: true,
-    });
-
-    newMarker.addListener('dragend', (event: any) => {
-      const lat = event.latLng.lat();
-      const lng = event.latLng.lng();
-      updateLocation({ lat, lng }, newMap, newMarker);
-    });
-
-    newMap.addListener('click', (e: any) => {
-      const lat = e.latLng.lat();
-      const lng = e.latLng.lng();
-      updateLocation({ lat, lng }, newMap, newMarker);
-    });
-
-    setMap(newMap);
-    setMarker(newMarker);
-  };
-
-  const updateLocation = async (location: any, map: any, marker: any) => {
-    setSelectedLocation(location);
-    marker.setPosition(location);
-    map.setCenter(location);
-
-    if (!window.google?.maps?.Geocoder) return;
-
-    try {
-      const geocoder = new window.google.maps.Geocoder();
-      const result = await geocoder.geocode({ location });
-      const address = result.results[0]?.formatted_address || 'Adresse sélectionnée';
-
-      if (onLocationSelect) {
-        onLocationSelect({ lat: location.lat, lng: location.lng, address });
-      }
-    } catch (error) {
-      console.error('Geocoding error:', error);
-    }
-  };
+  }, [updateLocation, selectedLocation]);
 
   const handleGetCurrentLocation = () => {
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
         (position) => {
           const { latitude, longitude } = position.coords;
-          updateLocation({ lat: latitude, lng: longitude }, map, marker);
+          if (map && marker) {
+            updateLocation({ lat: latitude, lng: longitude }, map, marker);
+          }
         },
         () => {
           alert('Autorisez la localisation ou cliquez sur la carte pour sélectionner un emplacement.');

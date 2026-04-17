@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { MapComponent } from '@/components/MapComponent';
 import { useCartStore } from '@/lib/cartStore';
@@ -14,12 +14,6 @@ export default function DeliveryAddressPage() {
   const [lng, setLng] = useState(11.5167);
   const [error, setError] = useState('');
   const setDeliveryAddress = useCartStore((state) => state.setDeliveryAddress);
-
-  useEffect(() => {
-    if (!adresse && !telephone) {
-      setTelephone('');
-    }
-  }, []);
 
   const handleLocationSelect = (location: { lat: number; lng: number; address: string }) => {
     setLat(location.lat);

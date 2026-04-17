@@ -103,7 +103,11 @@ export class PaymentsService {
     const order = await this.prisma.order.findUnique({
       where: { id: dto.orderId },
       include: {
-        items: true,
+        items: {
+          include: {
+            product: true,
+          },
+        },
         reseller: true,
       },
     });
@@ -112,9 +116,7 @@ export class PaymentsService {
       throw new NotFoundException(`Order ${dto.orderId} not found`);
     }
 
-    if (!order.resellerId) {
-      throw new BadRequestException(`Order ${dto.orderId} has no reseller attached`);
-    }
+    // NOTE: Direct platform purchases may not have a reseller attached.
 
     // ✅ STEP 4: Validate amount matches
     if (
@@ -125,13 +127,15 @@ export class PaymentsService {
       );
     }
 
+    const settlement = this.calculateOrderSettlement(order);
+
     // ✅ STEP 5: Create Payment + Release Escrow (ATOMIC TRANSACTION)
     const payment = await this.prisma.$transaction(async (tx: any) => {
       // Create payment record
       const newPayment = await tx.payment.create({
         data: {
           orderId: dto.orderId,
-          userId: order.resellerId || '',
+          userId: order.resellerId ?? undefined,
           amount: new Decimal(dto.amount),
           status: dto.status === 'COMPLETED' ? 'COMPLETED' : 'FAILED',
           provider: dto.provider,
@@ -155,8 +159,11 @@ export class PaymentsService {
           data: {
             status: 'PAID',
             escrowBalance: new Decimal(0),
+            ...settlement.orderUpdate,
           },
         });
+
+        await this.applyOrderSettlement(tx, order, settlement);
 
         this.logger.log(
           `[handlePaymentCallback] ✅ Payment completed. orderId=${dto.orderId}, paymentId=${newPayment.id}`,
@@ -183,6 +190,180 @@ export class PaymentsService {
       ...payment,
       isNewPayment: true,
     };
+  }
+
+  private calculateOrderSettlement(order: any) {
+    const productSubTotal = new Decimal(
+      order.productSubTotal ??
+        order.items.reduce(
+          (sum: Decimal, item: any) => sum.plus(new Decimal(item.totalPrice)),
+          new Decimal(0),
+        ),
+    );
+    const deliveryFee = new Decimal(order.deliveryFee ?? 0);
+
+    let gatewayFee = new Decimal(order.gatewayFee ?? 0);
+    if (gatewayFee.lte(0)) {
+      gatewayFee = productSubTotal
+        .plus(deliveryFee)
+        .times(0.03)
+        .toDecimalPlaces(0, Decimal.ROUND_UP);
+    }
+
+    const netAmount = order.totalAmount.minus(gatewayFee);
+    const resellerCommission = order.resellerId
+      ? order.items.reduce(
+          (sum: Decimal, item: any) =>
+            sum.plus(
+              new Decimal(item.product?.commission ?? 0).times(item.quantity ?? 1),
+            ),
+          new Decimal(0),
+        )
+      : new Decimal(0);
+
+    const adminProductFee = productSubTotal.times(0.05);
+    const deliveryAdminFee = deliveryFee.times(0.1);
+    const deliveryAgentFee = deliveryFee.minus(deliveryAdminFee);
+
+    const supplierBaseTotals = new Map<string, Decimal>();
+    let totalSupplierBase = new Decimal(0);
+    for (const item of order.items) {
+      const supplierId = item.product?.supplierId;
+      const itemRevenue = new Decimal(item.totalPrice).minus(
+        new Decimal(item.product?.commission ?? 0).times(item.quantity ?? 1),
+      );
+      const previous = supplierBaseTotals.get(supplierId) ?? new Decimal(0);
+      supplierBaseTotals.set(supplierId, previous.plus(itemRevenue));
+      totalSupplierBase = totalSupplierBase.plus(itemRevenue);
+    }
+
+    const supplierRevenuePool = productSubTotal
+      .minus(resellerCommission)
+      .minus(adminProductFee);
+
+    const supplierCredits = Array.from(supplierBaseTotals.entries()).map(
+      ([supplierId, supplierBase]) => {
+        const amount = totalSupplierBase.greaterThan(0)
+          ? supplierBase
+              .div(totalSupplierBase)
+              .times(supplierRevenuePool)
+              .toDecimalPlaces(4)
+          : new Decimal(0);
+        return {
+          supplierId,
+          amount,
+        };
+      },
+    );
+
+    const supplierRevenue = supplierCredits.reduce(
+      (sum, credit) => sum.plus(credit.amount),
+      new Decimal(0),
+    );
+
+    const adminTotal = adminProductFee.plus(gatewayFee).plus(deliveryAdminFee);
+
+    return {
+      orderUpdate: {
+        productSubTotal,
+        deliveryFee,
+        gatewayFee,
+        netAmount,
+        resellerCommission,
+        adminProductFee,
+        supplierRevenue,
+        deliveryAdminFee,
+        deliveryAgentFee,
+      },
+      resellerCommission,
+      supplierCredits,
+      adminTotal,
+      deliveryAgentFee,
+    };
+  }
+
+  private async applyOrderSettlement(
+    tx: any,
+    order: any,
+    settlement: any,
+  ) {
+    if (order.resellerId && settlement.resellerCommission.greaterThan(0)) {
+      await tx.user.update({
+        where: { id: order.resellerId },
+        data: {
+          walletBalance: {
+            increment: settlement.resellerCommission,
+          },
+        },
+      });
+
+      await tx.walletTransaction.create({
+        data: {
+          userId: order.resellerId,
+          orderId: order.id,
+          amount: settlement.resellerCommission,
+          type: 'RESELLER_COMMISSION',
+          description: 'Revendeur commission from order payment',
+        },
+      });
+    }
+
+    for (const credit of settlement.supplierCredits) {
+      if (credit.amount.greaterThan(0)) {
+        const supplierUser = await tx.user.findUnique({
+          where: { id: credit.supplierId },
+          select: { id: true },
+        });
+
+        if (!supplierUser) continue;
+
+        await tx.user.update({
+          where: { id: credit.supplierId },
+          data: {
+            walletBalance: {
+              increment: credit.amount,
+            },
+          },
+        });
+
+        await tx.walletTransaction.create({
+          data: {
+            userId: credit.supplierId,
+            orderId: order.id,
+            amount: credit.amount,
+            type: 'SUPPLIER_REVENUE',
+            description: 'Supplier revenue share from order payment',
+          },
+        });
+      }
+    }
+
+    if (settlement.adminTotal.greaterThan(0)) {
+      const platformAdmin = await tx.user.findFirst({
+        where: { role: 'ADMIN' },
+      });
+
+      if (platformAdmin) {
+        await tx.user.update({
+          where: { id: platformAdmin.id },
+          data: {
+            walletBalance: {
+              increment: settlement.adminTotal,
+            },
+          },
+        });
+
+        await tx.walletTransaction.create({
+          data: {
+            userId: platformAdmin.id,
+            orderId: order.id,
+            amount: settlement.adminTotal,
+            type: 'ADMIN_PRODUCT_FEE',
+            description: 'Platform fees collected from order payment',
+          },
+        });
+      }
+    }
   }
 
   /**
