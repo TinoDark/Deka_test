@@ -2,7 +2,7 @@
 
 ## Overview
 
-Complete payment system for Deka social-commerce platform featuring:
+Complete payment system for Dekora social-commerce platform featuring:
 - **Idempotent webhook callbacks** (prevent double-charging)
 - **Atomic transactions** (Payment + Escrow release in single DB action)
 - **Multi-provider support** (mix_by_yas, Moov Money)

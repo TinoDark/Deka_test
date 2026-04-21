@@ -156,7 +156,7 @@ POST   /admin/refunds/:id/process     → Traiter remboursement
 
 ### Frontend (.env.local)
 ```
-NEXT_PUBLIC_API_URL=http://dekatest-production.up.railway.app
+NEXT_PUBLIC_API_URL=http://dekoratest-production.up.railway.app
 NEXT_PUBLIC_GOOGLE_MAPS_API_KEY=YOUR_API_KEY  ← À REMPLACER
 ```
 

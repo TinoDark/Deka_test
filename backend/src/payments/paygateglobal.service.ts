@@ -86,7 +86,7 @@ export class PayGateGlobalService {
         auth_token: this.apiKey,
         phone_number: request.phone_number,
         amount: request.amount,
-        description: request.description || 'DEKA Payment',
+        description: request.description || 'Dekora Payment',
         identifier: request.identifier,
         network: request.network,
       };
@@ -123,7 +123,7 @@ export class PayGateGlobalService {
     const queryParams = new URLSearchParams({
       token: this.apiKey,
       amount: params.amount.toString(),
-      description: params.description || 'DEKA Payment',
+      description: params.description || 'Dekora Payment',
       identifier: params.identifier,
       ...(callbackUrl && { url: callbackUrl }),
       ...(params.phone && { phone: params.phone }),

@@ -48,12 +48,12 @@ Services lancés :
 
 ```bash
 # Option A : via CLI
-docker exec deka-minio mc mb /minio_data/deka-products
+docker exec dekora-minio mc mb /minio_data/dekora-products
 
 # Option B : via web console
 # http://localhost:9001
 # Login : minioadmin / minioadmin
-# Créer bucket "deka-products"
+# Créer bucket "dekora-products"
 ```
 
 ---
@@ -151,13 +151,13 @@ curl -X POST http://localhost:3000/suppliers/inventory/agent-sync \
 ### A. Consulter MinIO
 
 Console web : http://localhost:9001
-- Images uploadées : `deka-products → products → {supplier_id} → *.webp`
+- Images uploadées : `dekora-products → products → {supplier_id} → *.webp`
 
 ### B. Interroger la BD PostgreSQL
 
 ```bash
 # Se connecter à PostgreSQL
-docker exec -it deka-postgres psql -U deka -d deka_social_commerce
+docker exec -it dekora-postgres psql -U dekora -d dekora_social_commerce
 
 # Lister les produits
 SELECT reference_interne, nom_produit, prix_vente, commission, stock_quantity, is_active, image_cdn_url 
@@ -173,7 +173,7 @@ LIMIT 5;
 ### C. Consulter les logs NestJS
 
 ```bash
-docker logs -f deka-backend
+docker logs -f dekora-backend
 ```
 
 ---
@@ -184,7 +184,7 @@ docker logs -f deka-backend
 
 ```bash
 # Recréer le bucket
-docker exec deka-minio mc mb /minio_data/deka-products
+docker exec dekora-minio mc mb /minio_data/dekora-products
 ```
 
 ### MINIO_ENDPOINT "Cannot connect"
@@ -254,7 +254,7 @@ Fournisseur a installé l'agent local qui surveille son Excel :
 
 ```bash
 # Production : À changer !
-DATABASE_URL="postgresql://deka:password123@localhost:5432/deka_social_commerce"
+DATABASE_URL="postgresql://dekora:password123@localhost:5432/dekora_social_commerce"
 JWT_SECRET="your-secret-key-here"
 STORAGE_BACKEND="minio"
 # ... voir .env.example pour tous les paramètres

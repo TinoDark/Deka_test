@@ -211,8 +211,8 @@ git push origin main
 # From project root
 docker-compose up -d postgres redis
 cd backend
-docker build -f Dockerfile -t deka-backend:latest .
-docker run -d --name backend -p 3000:3000 --env-file .env deka-backend:latest
+docker build -f Dockerfile -t dekora-backend:latest .
+docker run -d --name backend -p 3000:3000 --env-file .env dekora-backend:latest
 ```
 
 ### Option 2: Direct Node.js
@@ -236,7 +236,7 @@ Create `.env` in `backend/` directory:
 
 ```env
 # Database
-DATABASE_URL="postgresql://user:password@localhost:5432/deka_db"
+DATABASE_URL="postgresql://user:password@localhost:5432/dekora_db"
 
 # JWT
 JWT_SECRET="your-super-secret-key-change-this"

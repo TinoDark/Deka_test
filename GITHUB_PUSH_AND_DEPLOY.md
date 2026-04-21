@@ -1,4 +1,4 @@
-# 🚀 DEKA - GitHub Push & Deployment Guide
+# 🚀 Dekora - GitHub Push & Deployment Guide
 
 **Complete step-by-step instructions for pushing to GitHub and deploying to production.**
 
@@ -20,7 +20,7 @@
 ### Create Repository on GitHub
 
 1. Go to [github.com/new](https://github.com/new)
-2. Repository name: `deka` (or your preference)
+2. Repository name: `dekora` (or your preference)
 3. Description: `Social-Commerce as a Service Platform`
 4. Choose: **Private** (for development) or **Public** (for open-source)
 5. **Create repository**
@@ -35,7 +35,7 @@ cd c:\Users\USER\Deka_test
 git init
 
 # Add GitHub repository as remote
-git remote add origin https://github.com/YOUR_USERNAME/deka.git
+git remote add origin https://github.com/YOUR_USERNAME/dekora.git
 
 # Verify
 git remote -v
@@ -101,7 +101,7 @@ git add .
 ### Create Initial Commit
 
 ```bash
-git commit -m "feat: Initial DEKA platform - Backend + Frontend
+git commit -m "feat: Initial Dekora platform - Backend + Frontend
 
 ✅ COMPLETE: Backend (NestJS 10.3)
    - Payments API with idempotent callbacks
@@ -161,7 +161,7 @@ git push origin main
    - Authenticate GitHub
 
 3. **Connect Repository**
-   - Select your `deka` repository
+   - Select your `dekora` repository
    - Railway will auto-detect Node.js
 
 4. **Configure Environment**
@@ -169,7 +169,7 @@ git push origin main
    - Add these variables:
 
    ```
-   DATABASE_URL=postgresql://user:password@host:5432/deka_db
+   DATABASE_URL=postgresql://user:password@host:5432/dekora_db
    JWT_SECRET=<generate-32-char-random>
    PAYMENT_WEBHOOK_SECRET=<generate-32-char-random>
    NODE_ENV=production
@@ -179,7 +179,7 @@ git push origin main
 5. **Deploy**
    - Click "Deploy"
    - Wait for build to complete (~2-3 min)
-   - Note the public URL (e.g., `https://deka-backend.railway.app`)
+   - Note the public URL (e.g., `https://dekora-backend.railway.app`)
 
 ### Option B: Docker (Advanced)
 
@@ -204,15 +204,15 @@ git push origin main
 
 2. **Build Image**
    ```bash
-   docker build -f backend/Dockerfile -t deka-backend:latest .
+   docker build -f backend/Dockerfile -t dekora-backend:latest .
    ```
 
 3. **Run Container**
    ```bash
    docker run -p 3000:3000 \
-     -e DATABASE_URL="postgresql://user:pass@host:5432/deka_db" \
+     -e DATABASE_URL="postgresql://user:pass@host:5432/dekora_db" \
      -e JWT_SECRET="your-secret" \
-     deka-backend:latest
+     dekora-backend:latest
    ```
 
 ### Option C: AWS/GCP/Azure
@@ -235,7 +235,7 @@ git push origin main
 2. **Import Project**
    - Click "Add New"
    - Select "Project"
-   - Select your `deka` repository
+   - Select your `dekora` repository
 
 3. **Configure**
    - **Root Directory**: `frontend-web`
@@ -243,12 +243,12 @@ git push origin main
 
 4. **Add Environment Variables**
    - **Name**: `NEXT_PUBLIC_API_URL`
-   - **Value**: `https://deka-backend.railway.app` (from Railway step)
+   - **Value**: `https://dekora-backend.railway.app` (from Railway step)
 
 5. **Deploy**
    - Click "Deploy"
    - Wait for build (~1-2 min)
-   - Get public URL (e.g., `https://deka.vercel.app`)
+   - Get public URL (e.g., `https://dekora.vercel.app`)
 
 ### Option B: Netlify
 
@@ -270,8 +270,8 @@ git push origin main
 ssh user@your-server.com
 
 # Clone repo
-git clone https://github.com/YOUR_USERNAME/deka.git
-cd deka/frontend-web
+git clone https://github.com/YOUR_USERNAME/dekora.git
+cd dekora/frontend-web
 
 # Install & build
 npm install
@@ -279,7 +279,7 @@ npm run build
 
 # Start with PM2
 npm install -g pm2
-pm2 start npm --name "deka-frontend" -- run start
+pm2 start npm --name "dekora-frontend" -- run start
 pm2 save
 pm2 startup
 ```
@@ -292,24 +292,24 @@ pm2 startup
 
 1. **Create Database**
    ```sql
-   createdb deka_db
+   createdb dekora_db
    ```
 
 2. **Create User**
    ```sql
-   createuser deka_user
-   psql -c "ALTER USER deka_user PASSWORD 'your_strong_password';"
-   psql -c "ALTER USER deka_user CREATEDB;"
+   createuser dekora_user
+   psql -c "ALTER USER dekora_user PASSWORD 'your_strong_password';"
+   psql -c "ALTER USER dekora_user CREATEDB;"
    ```
 
 3. **Grant Privileges**
    ```sql
-   psql -d deka_db -c "GRANT ALL PRIVILEGES ON DATABASE deka_db TO deka_user;"
+   psql -d dekora_db -c "GRANT ALL PRIVILEGES ON DATABASE dekora_db TO dekora_user;"
    ```
 
 4. **Update .env**
    ```
-   DATABASE_URL="postgresql://deka_user:your_strong_password@localhost:5432/deka_db"
+   DATABASE_URL="postgresql://dekora_user:your_strong_password@localhost:5432/dekora_db"
    ```
 
 ### Run Migrations
@@ -335,7 +335,7 @@ npx prisma db seed
 
 ```bash
 # Should return 200 with error message (no auth)
-curl https://deka-backend.railway.app/payments
+curl https://dekora-backend.railway.app/payments
 
 # Should return 401 (expected - no token)
 # Output: { "message": "Unauthorized", "statusCode": 401 }
@@ -345,7 +345,7 @@ curl https://deka-backend.railway.app/payments
 
 ```bash
 # Get signup page
-curl https://deka.vercel.app/signup
+curl https://dekora.vercel.app/signup
 
 # Should see HTML with sign-up form
 ```
@@ -389,8 +389,8 @@ SMTP_PASS=your-app-password
 
 For MTN, Moov Money:
 - Register your URLs in their dashboards:
-  - `https://deka-backend.railway.app/payments/callback`
-  - `https://deka-backend.railway.app/payments/payouts/webhook`
+  - `https://dekora-backend.railway.app/payments/callback`
+  - `https://dekora-backend.railway.app/payments/payouts/webhook`
 - Get API keys and add to backend `.env`
 
 ---
@@ -421,14 +421,14 @@ railway logs
 vercel logs
 
 # Local server
-tail -f /var/log/deka/*.log
+tail -f /var/log/dekora/*.log
 ```
 
 ### Database Backups
 
 ```bash
 # Daily backup
-0 2 * * * pg_dump deka_db | gzip > /backups/deka_$(date +\%Y\%m\%d).sql.gz
+0 2 * * * pg_dump dekora_db | gzip > /backups/dekora_$(date +\%Y\%m\%d).sql.gz
 ```
 
 ---
@@ -452,7 +452,7 @@ tail -f /var/log/deka/*.log
 
 ### Sign Up & Login
 
-1. Go to `https://deka.vercel.app`
+1. Go to `https://dekora.vercel.app`
 2. Click "Get Started"
 3. Choose "Reseller"
 4. Fill form & sign up
@@ -543,17 +543,17 @@ After deployment:
 
 | Resource | Link |
 |----------|------|
-| **Frontend** | `https://deka.vercel.app` |
-| **Backend API** | `https://deka-backend.railway.app` |
-| **API Docs** | `https://deka-backend.railway.app/api` |
-| **GitHub** | `https://github.com/YOUR_USERNAME/deka` |
+| **Frontend** | `https://dekora.vercel.app` |
+| **Backend API** | `https://dekora-backend.railway.app` |
+| **API Docs** | `https://dekora-backend.railway.app/api` |
+| **GitHub** | `https://github.com/YOUR_USERNAME/dekora` |
 | **Documentation** | See `CLAUDE.md` and `*.md` files |
 
 ---
 
 ## ✨ Deployment Complete!
 
-🎉 Your DEKA platform is now live!
+🎉 Your Dekora platform is now live!
 
 **Next**: Share with users and start onboarding.
 

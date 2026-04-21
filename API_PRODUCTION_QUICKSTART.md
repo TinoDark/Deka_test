@@ -5,7 +5,7 @@
 | Env | Où gérer? | Exemples | Risque |
 |-----|-----------|----------|--------|
 | **DEV** | `.env.local` (local) | `localhost:3000` | Bas |
-| **PROD** | Railway Console | `https://api.deka.app` | Critique |
+| **PROD** | Railway Console | `https://api.dekora.app` | Critique |
 
 ---
 
@@ -21,12 +21,12 @@
 
 | Variable | Valeur Production |
 |----------|------------------|
-| `DATABASE_URL` | `postgresql://user:****@host/deka` |
+| `DATABASE_URL` | `postgresql://user:****@host/dekora` |
 | `JWT_SECRET` | `7f3e9c2a1b4d8f...` (32+ chars) |
 | `GOOGLE_MAPS_API_KEY` | Clé production avec restrictions domaine |
 | `PAYGATEGLOBAL_API_KEY` | Clé production du partenaire |
 | `NODE_ENV` | `production` |
-| `API_URL` | `https://api.deka.app` |
+| `API_URL` | `https://api.dekora.app` |
 | `ADMIN_PASSWORD` | Mot de passe strong |
 
 ### Étape 2: Générer JWT_SECRET
@@ -83,9 +83,9 @@ Une fois clé obtenue:
 2. Cliquez sur la clé
 3. Application restrictions → HTTP referrers
 4. Ajouter domaines:
-   - `*.deka.app`
-   - `deka.app`
-   - `www.deka.app`
+   - `*.dekora.app`
+   - `dekora.app`
+   - `www.dekora.app`
 
 **Résultat**: Clé fonctionnera UNIQUEMENT sur votre domaine.
 
@@ -116,8 +116,8 @@ NEXT_PUBLIC_API_URL=http://localhost:3000
 NEXT_PUBLIC_GOOGLE_MAPS_API_KEY=AIzaSyBu-_37ha7_gG9RvCKSJW6cqObvnWWBkE
 
 # backend/.env
-DATABASE_URL=postgresql://localhost:5432/deka_dev
-JWT_SECRET=deka-dev-secret
+DATABASE_URL=postgresql://localhost:5432/dekora_dev
+JWT_SECRET=dekora-dev-secret
 NODE_ENV=development
 ```
 
@@ -135,14 +135,14 @@ cd frontend-web && npm run dev
 ### Production (PROD)
 ```bash
 # Railway Console Variables (UI):
-DATABASE_URL=postgresql://prod-user:****@railway-db:5432/deka_prod
+DATABASE_URL=postgresql://prod-user:****@railway-db:5432/dekora_prod
 JWT_SECRET=a7f3e9c2a1b4d8f6e5a9c2b1d4e7f8a9...
 GOOGLE_MAPS_API_KEY=AIzaSyBu-prod-key-restricted...
 NODE_ENV=production
-API_URL=https://api.deka.app
+API_URL=https://api.dekora.app
 
 # Frontend (Vercel ou Railway):
-NEXT_PUBLIC_API_URL=https://api.deka.app
+NEXT_PUBLIC_API_URL=https://api.dekora.app
 NEXT_PUBLIC_GOOGLE_MAPS_API_KEY=AIzaSyBu-prod-key...
 ```
 
@@ -164,7 +164,7 @@ git push origin main
 - [ ] .gitignore contient `.env.*.local`
 - [ ] NODE_ENV=production en Railway
 - [ ] ADMIN_PASSWORD changé (pas admin123)
-- [ ] API_URL pointeur bon domaine (https://api.deka.app)
+- [ ] API_URL pointeur bon domaine (https://api.dekora.app)
 - [ ] Tous les secrets dans Railway Console
 - [ ] `git push` → Railway déploie automatiquement
 

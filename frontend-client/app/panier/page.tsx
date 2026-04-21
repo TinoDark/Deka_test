@@ -1,5 +1,6 @@
 'use client';
 
+import Image from 'next/image';
 import Link from 'next/link';
 import { useMemo } from 'react';
 import { useCartStore } from '@/lib/cartStore';
@@ -47,13 +48,15 @@ export default function CartPage() {
               {items.map((item) => (
                 <div key={item.productId} className="flex flex-col gap-4 rounded-[28px] border border-slate-200 bg-white p-6 sm:flex-row sm:items-center sm:justify-between">
                   <div className="flex items-center gap-4">
-                    <img
+                    <Image
                       src={
                         item.image_cdn_url ||
                         'https://via.placeholder.com/240x240?text=Image+manquante'
                       }
                       alt={item.nom}
-                      className="h-24 w-24 rounded-3xl object-cover"
+                      width={96}
+                      height={96}
+                      className="rounded-3xl object-cover"
                     />
                     <div>
                       <h2 className="text-xl font-semibold text-slate-900">{item.nom}</h2>

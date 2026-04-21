@@ -1,4 +1,4 @@
-# 🎉 DEKA PLATFORM - FINAL SUMMARY
+# 🎉 DEKORA PLATFORM - FINAL SUMMARY
 
 **Date**: 26 mars 2026  
 **Status**: ✅ **COMPLETE & PRODUCTION READY**  
@@ -37,9 +37,9 @@
 cd c:\Users\USER\Deka_test
 git init
 git add .
-git commit -m "feat: Complete DEKA platform"
+git commit -m "feat: Complete Dekora platform"
 # Create GitHub repo
-git remote add origin https://github.com/YOUR_USERNAME/deka.git
+git remote add origin https://github.com/YOUR_USERNAME/dekora.git
 git push -u origin main
 ```
 
@@ -95,7 +95,7 @@ git push -u origin main
 
 ## 🎉 CONCLUSION
 
-**Your DEKA Social-Commerce platform is COMPLETE and READY FOR PRODUCTION.**
+**Your Dekora Social-Commerce platform is COMPLETE and READY FOR PRODUCTION.**
 
 Follow the deployment guide in `GITHUB_PUSH_AND_DEPLOY.md` to go live in 30 minutes.
 

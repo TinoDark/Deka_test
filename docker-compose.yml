@@ -6,17 +6,17 @@ services:
   # ========================================================
   postgres:
     image: postgres:15-alpine
-    container_name: deka-postgres
+    container_name: dekora-postgres
     environment:
-      POSTGRES_USER: deka
+      POSTGRES_USER: dekora
       POSTGRES_PASSWORD: password123
-      POSTGRES_DB: deka_social_commerce
+      POSTGRES_DB: dekora_social_commerce
     ports:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     health_check:
-      test: ["CMD-SHELL", "pg_isready -U deka"]
+      test: ["CMD-SHELL", "pg_isready -U dekora"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -26,7 +26,7 @@ services:
   # ========================================================
   redis:
     image: redis:7-alpine
-    container_name: deka-redis
+    container_name: dekora-redis
     ports:
       - "6379:6379"
     volumes:
@@ -42,7 +42,7 @@ services:
   # ========================================================
   minio:
     image: minio/minio
-    container_name: deka-minio
+    container_name: dekora-minio
     environment:
       MINIO_ROOT_USER: minioadmin
       MINIO_ROOT_PASSWORD: minioadmin
@@ -60,14 +60,14 @@ services:
     build:
       context: ./backend
       dockerfile: Dockerfile
-    container_name: deka-backend
+    container_name: dekora-backend
     depends_on:
       postgres:
         condition: service_healthy
       redis:
         condition: service_healthy
     environment:
-      DATABASE_URL: postgresql://deka:password123@postgres:5432/deka_social_commerce
+      DATABASE_URL: postgresql://dekora:password123@postgres:5432/dekora_social_commerce
       REDIS_URL: redis://redis:6379
       JWT_SECRET: your-super-secret-jwt-key-change-in-production
       NODE_ENV: development
@@ -85,7 +85,7 @@ services:
     build:
       context: ./frontend-client
       dockerfile: Dockerfile
-    container_name: deka-frontend-client
+    container_name: dekora-frontend-client
     environment:
       NEXT_PUBLIC_API_URL: http://localhost:3000
     ports:
@@ -100,7 +100,7 @@ services:
     build:
       context: ./frontend-web
       dockerfile: Dockerfile.reseller
-    container_name: deka-frontend-reseller
+    container_name: dekora-frontend-reseller
     environment:
       NEXT_PUBLIC_API_URL: http://localhost:3000
     ports:
@@ -115,7 +115,7 @@ services:
     build:
       context: ./frontend-web
       dockerfile: Dockerfile.supplier
-    container_name: deka-frontend-supplier
+    container_name: dekora-frontend-supplier
     environment:
       NEXT_PUBLIC_API_URL: http://localhost:3000
     ports:
@@ -130,7 +130,7 @@ services:
     build:
       context: ./frontend-web
       dockerfile: Dockerfile.admin
-    container_name: deka-frontend-admin
+    container_name: dekora-frontend-admin
     environment:
       NEXT_PUBLIC_API_URL: http://localhost:3000
     ports:
@@ -145,4 +145,4 @@ volumes:
 
 networks:
   default:
-    name: deka-network
+    name: dekora-network

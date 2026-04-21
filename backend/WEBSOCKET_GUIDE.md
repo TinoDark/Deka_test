@@ -313,7 +313,7 @@ En production, assurez-vous que :
    ```typescript
    @WebSocketGateway({
      cors: {
-       origin: ['https://app.deka.com', 'https://admin.deka.com'],
+       origin: ['https://app.dekora.com', 'https://admin.dekora.com'],
      },
    })
    ```
@@ -336,4 +336,4 @@ En production, assurez-vous que :
 
 ---
 
-*Généré pour Deka Social-Commerce Platform*
+*Généré pour Dekora Social-Commerce Platform*

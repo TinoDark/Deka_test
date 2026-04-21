@@ -1,4 +1,4 @@
-# Deka Backend API Documentation
+# Dekora Backend API Documentation
 
 ## 🔌 Overview
 
@@ -23,7 +23,7 @@ POST /auth/login
 Content-Type: application/json
 
 {
-  "email": "user@deka.com",
+  "email": "user@dekora.com",
   "password": "password123"
 }
 
@@ -33,7 +33,7 @@ Response 200 OK:
   "refreshToken": "eyJhbGc...",
   "user": {
     "id": "uuid",
-    "email": "user@deka.com",
+    "email": "user@dekora.com",
     "role": "SUPPLIER",
     "kycStatus": "APPROVED"
   }
@@ -47,7 +47,7 @@ POST /auth/register
 Content-Type: application/json
 
 {
-  "email": "newuser@deka.com",
+  "email": "newuser@dekora.com",
   "password": "secure123",
   "phone": "+212611111111",
   "role": "RESELLER"  // or SUPPLIER, DELIVERY
@@ -407,7 +407,7 @@ Response:
 # Login
 curl -X POST http://localhost:3000/auth/login \
   -H "Content-Type: application/json" \
-  -d '{"email":"user@deka.com","password":"password123"}'
+  -d '{"email":"user@dekora.com","password":"password123"}'
 
 # Get products
 curl -X GET http://localhost:3000/catalog \

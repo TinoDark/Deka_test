@@ -429,7 +429,7 @@ export class PaymentsService {
 
         const paymentUrl = await this.payGateGlobalService.generatePaymentPageUrl({
           amount: order.totalAmount.toNumber(),
-          description: `DEKA Order ${orderId}`,
+          description: `Dekora Order ${orderId}`,
           identifier: txReference,
           url: callbackUrl,
         });

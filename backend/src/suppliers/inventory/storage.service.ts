@@ -36,7 +36,7 @@ export class StorageService {
     }
 
     this.bucketName =
-      this.configService.get<string>('STORAGE_BUCKET') || 'deka-products';
+      this.configService.get<string>('STORAGE_BUCKET') || 'dekora-products';
     this.cdnBaseUrl =
       this.configService.get<string>('CDN_BASE_URL') || 'http://localhost:9000';
 

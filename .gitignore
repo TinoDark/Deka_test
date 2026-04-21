@@ -36,7 +36,7 @@ coverage/
 # Database
 *.db
 *.db-journal
-deka_delivery.db
+dekora_delivery.db
 
 # Logs
 logs/

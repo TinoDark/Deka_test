@@ -1,4 +1,4 @@
-# Deka Development Guide
+# Dekora Development Guide
 
 ## 🎯 Phase 1 : Cœur Transactionnel (À faire)
 

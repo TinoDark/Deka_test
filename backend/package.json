@@ -1,8 +1,8 @@
 {
-  "name": "deka-backend",
+  "name": "dekora-backend",
   "version": "0.1.0",
   "description": "Backend Social-Commerce as a Service - NestJS",
-  "author": "Deka Team",
+  "author": "Dekora Team",
   "private": true,
   "license": "MIT",
   "scripts": {

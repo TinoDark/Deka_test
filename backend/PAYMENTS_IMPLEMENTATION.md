@@ -2,7 +2,7 @@
 
 ## ✅ What Was Built
 
-A complete, production-ready payments API for Deka social-commerce platform with:
+A complete, production-ready payments API for Dekora social-commerce platform with:
 
 - ✅ **Idempotent webhook callbacks** (no double-charging)
 - ✅ **Atomic transactions** (Payment + Order update in one DB action)

@@ -1,4 +1,4 @@
-# DEKA Platform - Déploiement Production Ready ✅
+# Dekora Platform - Déploiement Production Ready ✅
 
 **Date**: 2 avril 2026  
 **Statut**: ✅ **PRÊT POUR PRODUCTION**
@@ -44,10 +44,10 @@
 ### Backend (.env)
 ```bash
 # Database
-DATABASE_URL="postgresql://deka:password123@localhost:5432/deka_social_commerce"
+DATABASE_URL="postgresql://dekora:password123@localhost:5432/dekora_social_commerce"
 
 # JWT
-JWT_SECRET="deka-secret-key-change-in-production"
+JWT_SECRET="dekora-secret-key-change-in-production"
 
 # Mobile Money (PayGateGlobal)
 PAYGATEGLOBAL_API_KEY="5c08692e-2c11-4839-a810-cccd34ca2edf"
@@ -56,7 +56,7 @@ PAYGATEGLOBAL_API_KEY="5c08692e-2c11-4839-a810-cccd34ca2edf"
 GOOGLE_MAPS_API_KEY="AIzaSyBu-_37ha7_gG9RvCKSJW6cqObvnWWBkE"
 
 # Admin User
-ADMIN_EMAIL="admin@deka.local"
+ADMIN_EMAIL="admin@dekora.local"
 ADMIN_PASSWORD="admin123"
 ```
 
@@ -243,7 +243,7 @@ GET    /payments/history          → Historique paiements
 
 ### Étapes d'activation
 1. Accés [Google Cloud Console](https://console.cloud.google.com)
-2. Créer nouveau projet: "DEKA Platform"
+2. Créer nouveau projet: "Dekora Platform"
 3. Activer APIs:
    - Google Maps JavaScript API
    - Geocoding API
@@ -252,7 +252,7 @@ GET    /payments/history          → Historique paiements
 
 ### Restrictions de Sécurité
 ```
-HTTP referrer: localhost:3000, localhost:3001, *.deka.app
+HTTP referrer: localhost:3000, localhost:3001, *.dekora.app
 ```
 
 ---
@@ -384,4 +384,4 @@ curl http://localhost:3001/health
 
 *Généré par: GitHub Copilot*  
 *Date: 2 avril 2026*  
-*Plateforme: DEKA Social-Commerce as a Service*
+*Plateforme: Dekora Social-Commerce as a Service*

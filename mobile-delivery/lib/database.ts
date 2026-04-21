@@ -7,7 +7,7 @@ let db: SQLiteDatabase | null = null;
 export async function initDatabase() {
   if (db) return db;
   
-  db = openDatabaseSync('deka_delivery.db');
+  db = openDatabaseSync('dekora_delivery.db');
   
   // Create tables for offline sync
   db.execSync(`
@@ -49,6 +49,65 @@ export async function initDatabase() {
 
 export function getDatabase() {
   return db;
+}
+
+export async function saveDeliveryTask(task: {
+  id: string;
+  packageCode: string;
+  status: string;
+  customerName: string;
+  customerPhone: string;
+  deliveryAddress: string;
+  deliveryLat: number;
+  deliveryLng: number;
+  pickups: Array<{ storeName: string; address: string; lat: number; lng: number }>;
+  totalAmount: number;
+  amountDue: number;
+  cod: boolean;
+}) {
+  const db = getDatabase();
+  if (!db) throw new Error('Database not initialized');
+
+  db.runSync(
+    `INSERT OR REPLACE INTO delivery_tasks (id, package_code, status, order_data, collected_at, lat, lng, customer_name, customer_phone, delivery_notes)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+    [
+      task.id,
+      task.packageCode,
+      task.status,
+      JSON.stringify(task),
+      null,
+      task.deliveryLat,
+      task.deliveryLng,
+      task.customerName,
+      task.customerPhone,
+      null,
+    ]
+  );
+}
+
+export async function getDeliveryTasks() {
+  const db = getDatabase();
+  if (!db) return [];
+
+  const rows = db.getAllSync('SELECT * FROM delivery_tasks ORDER BY customer_name ASC');
+  return rows.map((row: any) => {
+    const orderData = row.order_data ? JSON.parse(row.order_data) : {};
+    return {
+      id: row.id,
+      packageCode: row.package_code,
+      status: row.status,
+      customerName: row.customer_name,
+      customerPhone: row.customer_phone,
+      deliveryAddress: row.deliveryAddress || orderData.deliveryAddress || '',
+      deliveryLat: row.lat,
+      deliveryLng: row.lng,
+      pickups: orderData.pickups || [],
+      totalAmount: orderData.totalAmount || 0,
+      amountDue: orderData.amountDue || 0,
+      cod: orderData.cod || false,
+    };
+  });
 }
 
 export async function addToSyncQueue(

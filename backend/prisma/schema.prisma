@@ -1,4 +1,4 @@
-// Deka Backend - Prisma Schema
+// Dekora Backend - Prisma Schema
 // Social-Commerce as a Service Platform
 
 generator client {

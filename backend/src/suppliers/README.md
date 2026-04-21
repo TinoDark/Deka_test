@@ -156,7 +156,7 @@ MINIO_PORT=9000
 MINIO_USE_SSL=false
 MINIO_ACCESS_KEY=minioadmin
 MINIO_SECRET_KEY=minioadmin
-STORAGE_BUCKET=deka-products
+STORAGE_BUCKET=dekora-products
 CDN_BASE_URL=http://localhost:9000
 ```
 
@@ -166,7 +166,7 @@ STORAGE_BACKEND=s3
 AWS_REGION=eu-west-1
 AWS_ACCESS_KEY_ID=your-key
 AWS_SECRET_ACCESS_KEY=your-secret
-STORAGE_BUCKET=deka-products
+STORAGE_BUCKET=dekora-products
 CDN_BASE_URL=https://your-cloudfront-domain.cloudfront.net
 ```
 
@@ -401,7 +401,7 @@ docker-compose up minio
 ### 4. Créer le bucket MinIO
 
 ```bash
-docker exec deka-minio mc mb /minio_data/deka-products
+docker exec dekora-minio mc mb /minio_data/dekora-products
 ```
 
 ---

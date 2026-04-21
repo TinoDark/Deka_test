@@ -1,4 +1,4 @@
-# 📑 Index complet — Documentation Deka Sync Excel
+# 📑 Index complet — Documentation Dekora Sync Excel
 
 **Date**: 26 mars 2026  
 **Module**: Sync Inventaire Excel (Section 12 CLAUDE.md)  
@@ -417,3 +417,4 @@ lastUsedAt  DateTime?
 **Dernière mise à jour**: 26.03.2026  
 **Maintenu par**: Deka Team  
 **License**: MIT
+

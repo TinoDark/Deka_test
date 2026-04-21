@@ -2,6 +2,7 @@
   "dependencies": {
     "@types/uuid": "^10.0.0",
     "axios": "^1.14.0",
-    "decimal.js": "^10.6.0"
+    "decimal.js": "^10.6.0",
+    "expo": "^55.0.15"
   }
 }

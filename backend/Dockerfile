@@ -1,4 +1,4 @@
-# Deka Backend Dockerfile
+# Dekora Backend Dockerfile
 FROM node:20-slim
 
 WORKDIR /app

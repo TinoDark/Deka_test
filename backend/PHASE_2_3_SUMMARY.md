@@ -246,13 +246,13 @@ npm run start:dev
 ### 4. Créer le bucket MinIO (développement)
 
 ```bash
-docker exec deka-minio mc mb /minio_data/deka-products
+docker exec dekora-minio mc mb /minio_data/dekora-products
 ```
 
 Ou via la console MinIO :
 - http://localhost:9001
 - Credentials : minioadmin / minioadmin
-- Créer un bucket nommé `deka-products`
+- Créer un bucket nommé `dekora-products`
 
 ### 5. Tester les endpoints
 

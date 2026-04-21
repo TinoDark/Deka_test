@@ -1,4 +1,4 @@
-# ✅ RAPPORT FINAL - Déploiement DEKA Platform
+# ✅ RAPPORT FINAL - Déploiement Dekora Platform
 
 **Date**: 2 avril 2026  
 **Statut**: 🚀 **PRODUCTION READY**
@@ -210,7 +210,7 @@ npm run dev
 
 **Accès utilisateur test:**
 ```
-Admin:    admin@deka.local / admin123
+Admin:    admin@dekora.local / admin123
 Supplier: supplier@test.local (auto-généré signup)
 Reseller: reseller@test.local (auto-généré signup)
 ```
@@ -267,7 +267,7 @@ Reseller: reseller@test.local (auto-généré signup)
 ```
 ╔════════════════════════════════════════════════════════╗
 ║                                                        ║
-║  ✅ DEKA PLATFORM - PRÊT POUR DÉPLOIEMENT             ║
+║  ✅ Dekora PLATFORM - PRÊT POUR DÉPLOIEMENT             ║
 ║                                                        ║
 ║  Backend:  ✅ COMPILÉ (86 files)                      ║
 ║  Frontend: ✅ COMPILÉ (17 routes)                     ║
@@ -283,4 +283,4 @@ Reseller: reseller@test.local (auto-généré signup)
 
 **Généré par**: GitHub Copilot  
 **Date**: 2 avril 2026  
-**Plateforme**: DEKA Social-Commerce as a Service
+**Plateforme**: Dekora Social-Commerce as a Service

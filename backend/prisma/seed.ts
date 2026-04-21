@@ -20,11 +20,11 @@ async function main() {
   // Create admin user
   const adminUser = await prisma.user.create({
     data: {
-      email: 'admin@deka.com',
+      email: 'admin@dekora.com',
       passwordHash: await bcrypt.hash('admin123', 10),
       phone: '+1234567890',
       firstName: 'Admin',
-      lastName: 'Deka',
+      lastName: 'Dekora',
       role: UserRole.ADMIN,
       kycStatus: KYCStatus.APPROVED,
       isActive: true,
@@ -35,7 +35,7 @@ async function main() {
   // Create supplier users
   const supplier1 = await prisma.user.create({
     data: {
-      email: 'supplier1@deka.com',
+      email: 'supplier1@dekora.com',
       passwordHash: await bcrypt.hash('supplier123', 10),
       phone: '+1111111111',
       firstName: 'John',
@@ -48,7 +48,7 @@ async function main() {
 
   const supplier2 = await prisma.user.create({
     data: {
-      email: 'supplier2@deka.com',
+      email: 'supplier2@dekora.com',
       passwordHash: await bcrypt.hash('supplier123', 10),
       phone: '+2222222222',
       firstName: 'Jane',
@@ -63,7 +63,7 @@ async function main() {
   // Create reseller users
   const reseller1 = await prisma.user.create({
     data: {
-      email: 'reseller1@deka.com',
+      email: 'reseller1@dekora.com',
       passwordHash: await bcrypt.hash('reseller123', 10),
       phone: '+3333333333',
       firstName: 'Alice',

@@ -1,4 +1,4 @@
-# Deka Platform - Deployment Guide
+# Dekora Platform - Deployment Guide
 
 ## 🚀 Production Deployment
 
@@ -21,8 +21,8 @@ docker-compose build --no-cache
 ```bash
 # ECR
 aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin [YOUR_ECR_URL]
-docker tag deka-backend:latest [YOUR_ECR_URL]/deka-backend:latest
-docker push [YOUR_ECR_URL]/deka-backend:latest
+docker tag dekora-backend:latest [YOUR_ECR_URL]/dekora-backend:latest
+docker push [YOUR_ECR_URL]/dekora-backend:latest
 ```
 
 ---
@@ -62,7 +62,7 @@ railway up
 ```bash
 # 1. Create RDS PostgreSQL instance
 aws rds create-db-instance \
-  --db-instance-identifier deka-prod \
+  --db-instance-identifier dekora-prod \
   --db-instance-class db.t3.micro \
   --engine postgres
 
@@ -85,8 +85,8 @@ curl -fsSL https://get.docker.com -o get-docker.sh
 sh get-docker.sh
 
 # Clone repository
-git clone https://github.com/your-org/deka.git
-cd deka
+git clone https://github.com/your-org/dekora.git
+cd dekora
 
 # Setup environment
 cp .env.example .env
@@ -127,7 +127,7 @@ certbot renew --dry-run
 
 ```bash
 # Database
-DATABASE_URL="postgresql://user:pwd@prod-db.rds.amazonaws.com:5432/deka"
+DATABASE_URL="postgresql://user:pwd@prod-db.rds.amazonaws.com:5432/dekora"
 
 # Redis (managed service)
 REDIS_URL="redis://prod-redis.cache.amazonaws.com:6379"
@@ -139,17 +139,17 @@ JWT_EXPIRATION=900
 # API
 NODE_ENV="production"
 API_PORT=3000
-API_URL="https://api.deka.com"
+API_URL="https://api.dekora.com"
 
 # Frontend
-FRONTEND_CLIENT_URL="https://shop.deka.com"
-FRONTEND_RESELLER_URL="https://reseller.deka.com"
-FRONTEND_SUPPLIER_URL="https://supplier.deka.com"
-FRONTEND_ADMIN_URL="https://admin.deka.com"
+FRONTEND_CLIENT_URL="https://shop.dekora.com"
+FRONTEND_RESELLER_URL="https://reseller.dekora.com"
+FRONTEND_SUPPLIER_URL="https://supplier.dekora.com"
+FRONTEND_ADMIN_URL="https://admin.dekora.com"
 
 # Storage (AWS S3)
 AWS_REGION="us-east-1"
-AWS_S3_BUCKET="deka-prod"
+AWS_S3_BUCKET="dekora-prod"
 AWS_ACCESS_KEY_ID="$AWS_KEY" # From secrets manager
 AWS_SECRET_ACCESS_KEY="$AWS_SECRET" # From secrets manager
 
@@ -177,26 +177,26 @@ PAYMENT_WEBHOOK_SECRET="$WEBHOOK_SECRET"
 
 # Manual backup
 aws rds create-db-snapshot \
-  --db-instance-identifier deka-prod \
-  --db-snapshot-identifier deka-prod-$(date +%Y%m%d)
+  --db-instance-identifier dekora-prod \
+  --db-snapshot-identifier dekora-prod-$(date +%Y%m%d)
 
 # Restore from snapshot
 aws rds restore-db-instance-from-db-snapshot \
-  --db-instance-identifier deka-restore \
-  --db-snapshot-identifier deka-prod-20250326
+  --db-instance-identifier dekora-restore \
+  --db-snapshot-identifier dekora-prod-20250326
 ```
 
 ### Local PostgreSQL Backups
 
 ```bash
 # Dump database
-docker-compose exec postgres pg_dump -U deka deka_social_commerce > backup.sql
+docker-compose exec postgres pg_dump -U dekora dekora_social_commerce > backup.sql
 
 # Restore
-docker-compose exec postgres psql -U deka deka_social_commerce < backup.sql
+docker-compose exec postgres psql -U dekora dekora_social_commerce < backup.sql
 
 # Upload to S3
-aws s3 cp backup.sql s3://deka-backups/$(date +%Y%m%d).sql
+aws s3 cp backup.sql s3://dekora-backups/$(date +%Y%m%d).sql
 ```
 
 ---
@@ -330,5 +330,5 @@ docker-compose logs backend | grep "payment"
 ## 📞 Support
 
 - On-call rotation via Pagerduty
-- Slack #deka-alerts channel
-- Status page: status.deka.com
+- Slack #dekora-alerts channel
+- Status page: status.dekora.com

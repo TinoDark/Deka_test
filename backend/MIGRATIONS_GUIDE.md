@@ -13,7 +13,7 @@ Créez un fichier `.env` à la racine du dossier `backend/` :
 
 ```bash
 # Database
-DATABASE_URL="postgresql://user:password@localhost:5432/deka_dev"
+DATABASE_URL="postgresql://user:password@localhost:5432/dekora_dev"
 
 # JWT
 JWT_SECRET="your-super-secret-jwt-key-min-32-chars"
@@ -27,7 +27,7 @@ MINIO_ENDPOINT="localhost"
 MINIO_PORT=9000
 MINIO_ACCESS_KEY="minioadmin"
 MINIO_SECRET_KEY="minioadmin"
-MINIO_BUCKET="deka-products"
+MINIO_BUCKET="dekora-products"
 MINIO_USE_SSL=false
 MINIO_CDN_URL="http://localhost:9000"
 
@@ -35,7 +35,7 @@ MINIO_CDN_URL="http://localhost:9000"
 AWS_REGION="eu-west-1"
 AWS_ACCESS_KEY_ID="your-key"
 AWS_SECRET_ACCESS_KEY="your-secret"
-AWS_S3_BUCKET="deka-products"
+AWS_S3_BUCKET="dekora-products"
 AWS_S3_CDN_URL="https://d123.cloudfront.net"
 
 # Mobile Money (exemple mix_by_yas)
@@ -157,4 +157,4 @@ Cela applique les migrations **sans** créer de nouvelles.
 
 ---
 
-*Généré pour Deka Social-Commerce Platform*
+*Généré pour Dekora Social-Commerce Platform*

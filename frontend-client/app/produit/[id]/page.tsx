@@ -1,5 +1,6 @@
 'use client';
 
+import Image from 'next/image';
 import { useEffect, useState } from 'react';
 import { ProductDetailClient } from '@/components/ProductDetailClient';
 import { fetchProduct, type Product } from '@/lib/api';
@@ -62,15 +63,19 @@ export default function ProductPage({ params }: { params: { id: string } }) {
       <section className="mx-auto max-w-6xl px-4 py-14 sm:px-6 lg:px-8">
         <div className="grid gap-10 lg:grid-cols-[1.05fr_0.95fr]">
           <div className="rounded-[32px] border border-slate-200 bg-white p-6 shadow-sm">
-            <img
-              src={
-                product.image_cdn_url ||
-                product.image_url ||
-                'https://via.placeholder.com/640x480?text=Image+manquante'
-              }
-              alt={product.nom_produit}
-              className="h-[420px] w-full rounded-[28px] object-cover"
-            />
+            <div className="relative h-[420px] w-full overflow-hidden rounded-[28px] bg-slate-100">
+              <Image
+                src={
+                  product.image_cdn_url ||
+                  product.image_url ||
+                  'https://via.placeholder.com/640x480?text=Image+manquante'
+                }
+                alt={product.nom_produit}
+                fill
+                className="object-cover"
+                sizes="(max-width: 1024px) 100vw, 720px"
+              />
+            </div>
             <div className="mt-6 space-y-4">
               <p className="text-sm uppercase tracking-[0.3em] text-blue-600">{product.categorie || 'Produit'}</p>
               <h1 className="text-4xl font-bold text-slate-900">{product.nom_produit}</h1>

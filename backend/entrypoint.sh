@@ -5,7 +5,7 @@ set -e
 set -x
 
 echo "================================"
-echo "🔧 Deka Backend Startup"
+echo "🔧 Dekora Backend Startup"
 echo "================================"
 
 # For Railway: Accept self-signed certificates from postgres proxy
@@ -57,7 +57,7 @@ if [ ! -f "dist/main.js" ]; then
   exit 1
 fi
 
-echo "🚀 Starting Deka backend..."
+echo "🚀 Starting Dekora backend..."
 echo "Node: $(node --version)"
 echo "NODE_TLS_REJECT_UNAUTHORIZED: $NODE_TLS_REJECT_UNAUTHORIZED"
 echo "dist/main.js exists: $(test -f dist/main.js && echo 'YES' || echo 'NO')"
