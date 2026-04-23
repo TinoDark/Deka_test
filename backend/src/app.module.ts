@@ -12,6 +12,7 @@ import { AdminModule } from './admin/admin.module';
 import { SuppliersModule } from './suppliers/suppliers.module';
 import { WebSocketModule } from './common/websocket/websocket.module';
 import { KycModule } from './kyc/kyc.module';
+import { HealthModule } from './health/health.module';
 import { RbacGuard } from './common/guards/rbac.guard';
 
 @Module({
@@ -31,6 +32,7 @@ import { RbacGuard } from './common/guards/rbac.guard';
     SuppliersModule,
     WebSocketModule,
     KycModule,
+    HealthModule,
   ],
   providers: [
     {
